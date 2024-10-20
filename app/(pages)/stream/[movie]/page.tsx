@@ -64,14 +64,14 @@ export default function StreamPage({ params }: { params: { movie: string } }) {
           
         </div>
 
-        <aside className="w-full md:w-1/4">
+        <aside className="w-full md:w-1/4 overflow-hidden">
           <h3 className="text-lg font-semibold mb-4 text-[#1d1d1d]">Up next</h3>
           {upNext.map((video, index) => (
             <Link href={`/stream/${encodeURIComponent(video.name)}`} key={index}>
               <div className="flex mb-4 hover:bg-gray-100 p-2 rounded transition duration-300 cursor-pointer">
                 <img src={video.thumbnail} alt={video.name} className="w-40 h-24 object-cover rounded" />
                 <div className="ml-2">
-                  <p className="font-semibold text-[#1d1d1d]">{video.name.replaceAll("_"," ")}</p>
+                  <p className="font-semibold text-[#1d1d1d]">{video.name.replaceAll("_"," ").replaceAll("@"," ").replaceAll("."," ").replaceAll("[MZM]"," ").replaceAll("mkv"," ").replaceAll("mp4"," ").replaceAll("avi"," ").replaceAll("CV"," ")}</p>
                 </div>
               </div>
             </Link>

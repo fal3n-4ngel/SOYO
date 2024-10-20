@@ -15,6 +15,7 @@ export default function EnhancedVideoPlayer({ movie }: { movie: string }) {
 
   const playerRef = useRef<ReactPlayer>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+
   const decodedMovie = decodeURIComponent(movie);
 
   const togglePlay = () => setPlaying(!playing);
@@ -82,7 +83,7 @@ export default function EnhancedVideoPlayer({ movie }: { movie: string }) {
   }, []);
 
   return (
-    <div className="w-full max-w-4xl mx-auto" ref={containerRef}>
+    <div className="w-[95vw] md:max-w-[60vw] mx-auto overflow-hidden" ref={containerRef}>
       <div className="relative w-full bg-black rounded-xl overflow-hidden">
         {error ? (
           <div className="w-full h-full flex items-center justify-center bg-black text-white">
@@ -101,7 +102,7 @@ export default function EnhancedVideoPlayer({ movie }: { movie: string }) {
             onProgress={handleProgress}
             onDuration={handleDuration}
             className=""
-            fallback={<div className="w-full h-full bg-black flex items-center justify-center text-white">Loading...</div>}
+            fallback={<div className="w-full h-full  bg-black flex items-center justify-center text-white">Loading...</div>}
           />
         )}
         <div className="absolute bottom-0 left-0 right-0 p-2 sm:p-4 bg-gradient-to-t from-black to-transparent">
@@ -159,8 +160,8 @@ export default function EnhancedVideoPlayer({ movie }: { movie: string }) {
           </div>
         </div>
       </div>
-      <h2 className="text-lg sm:text-xl font-semibold mt-2 sm:mt-4 text-[#1d1d1d]">
-        {decodedMovie.replaceAll("_"," ").replaceAll("@"," ")}
+      <h2 className="text-lg sm:text-xl font-semibold mt-2 sm:mt-4 text-[#1d1d1d] flex">
+        {decodedMovie.replaceAll("_"," ").replaceAll("@"," ").replaceAll("."," ").replaceAll("[MZM]"," ").replaceAll("mkv"," ").replaceAll("mp4"," ").replaceAll("avi"," ").replaceAll("CV"," ")}
       </h2>
     </div>
   );
