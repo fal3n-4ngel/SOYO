@@ -15,7 +15,7 @@ export default function MovieListBox({ name, thumbnail }: MovieListBoxProps) {
 
       {/* Movie Title */}
       <div className="w-full text-center mb-2">
-        <h2 className="text-base font-medium text-gray-700 truncate">{name}</h2>
+        <h2 className="text-base font-medium text-gray-700 truncate text-justify">{name.replaceAll("@CV","").replaceAll("@","").replaceAll("."," ")}</h2>
       </div>
 
    
