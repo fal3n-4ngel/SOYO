@@ -14,10 +14,14 @@ Styling: Tailwind CSS
 - User-friendly interface for easy navigation and viewing.
 ### Screenshots
 
-<img src="https://github.com/user-attachments/assets/600f4ee0-b75c-4de8-8b07-ba6fa4ce80aa" alt="Laptop view" width="800"/>
+<img src="https://github.com/user-attachments/assets/e3f5eb97-e215-4439-8cb1-0c66e7744b27" alt="Laptop view" width="800"/>
+
+
+
+
 <p>
-  <img src="https://github.com/user-attachments/assets/9fdab3ef-1bad-4f3c-a946-ffd3a8ac167f" alt="Mobile view" width="20%" align="center"/>
-<img src="https://github.com/user-attachments/assets/b2081f29-58ec-4130-9749-927c6fb35970" alt="Mobile view" width="74%" align="center"/>
+  <img src="https://github.com/user-attachments/assets/80e48c38-e717-4e62-ac7c-b7be5f41886d" alt="Mobile view" width="20%" align="center"/>
+  <img src="https://github.com/user-attachments/assets/fd5eb887-87dc-4b41-aca4-76c74cee7c52" alt="Mobile view" width="75%" align="center"/>
 </p>
 
 
