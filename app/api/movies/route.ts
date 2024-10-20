@@ -1,19 +1,37 @@
 import { NextResponse } from 'next/server';
 import fs from 'fs';
+import path from 'path';
 
 const MOVIE_DIR = 'F:/';
 
+function getMoviesRecursively(dir: string) {
+  let results: { name: string; thumbnail: string }[] = [];
+
+  const list = fs.readdirSync(dir);
+
+  list.forEach((file) => {
+    const filePath = path.join(dir, file);
+    const stat = fs.statSync(filePath);
+
+    // If it's a directory, recurse into it
+    if (stat && stat.isDirectory()) {
+      results = results.concat(getMoviesRecursively(filePath));
+    } else {
+      // If it's a movie file, add it to the results
+      if (file.endsWith('.mp4') || file.endsWith('.avi') || file.endsWith('.mkv')) {
+        results.push({
+          name: file,
+          thumbnail: `/api/thumbnail/${encodeURIComponent(file)}`,
+        });
+      }
+    }
+  });
+
+  return results;
+}
 
 export async function GET() {
-  const movies = fs.readdirSync(MOVIE_DIR)
-    .filter(file => file.endsWith('.mp4') || file.endsWith('.avi') || file.endsWith('.mkv'))
-    .map(movie => {
-
-      return {
-        name: movie,
-        thumbnail: `/api/thumbnail/${encodeURIComponent(movie)}` 
-      };
-    });
+  const movies = getMoviesRecursively(MOVIE_DIR);
 
   return NextResponse.json(movies);
 }
