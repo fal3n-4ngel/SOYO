@@ -1,5 +1,4 @@
-# Soyo
-## Stream On Your Own
+# Soyo - Stream On Your Own
 ## What is Soyo?
 Soyo is a Next.js website designed to display video files stored on a local drive (default: F:/). The website is accessible throughout the local network, providing a convenient way to browse and view videos without needing a central server.
 
