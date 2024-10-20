@@ -10,17 +10,17 @@ interface Movie {
   thumbnail: string;
 }
 
-const availableDrives = ["F:/", "G:/", "H:/", "I:/"];
+//const availableDrives = ["F:/", "G:/", "H:/", "I:/"];
 
 export default function MovieList() {
   const [movies, setMovies] = useState<Movie[]>([]);
   const [filteredMovies, setFilteredMovies] = useState<Movie[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>("");
-  const [selectedDrive, setSelectedDrive] = useState<string>(availableDrives[0]);
+  //const [selectedDrive, setSelectedDrive] = useState<string>(availableDrives[0]);
 
   useEffect(() => {
-    fetch(`/api/movies?drive=${encodeURIComponent(selectedDrive)}`)
+    fetch(`/api/movies`)
       .then((res) => {
         if (!res.ok) throw new Error("Failed to fetch movies");
         return res.json();
@@ -30,7 +30,7 @@ export default function MovieList() {
         setFilteredMovies(data);
       })
       .catch((err) => setError(err.message));
-  }, [selectedDrive]);
+  }, []);
 
   useEffect(() => {
     if (searchQuery.trim() === "") {
@@ -87,7 +87,7 @@ export default function MovieList() {
           </p>
         </div>
 
-        <div className="mb-8 flex justify-center">
+        {/* <div className="mb-8 flex justify-center">
           <select
             className="px-4 py-2 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent"
             value={selectedDrive}
@@ -99,7 +99,7 @@ export default function MovieList() {
               </option>
             ))}
           </select>
-        </div>
+        </div> */}
 
         {filteredMovies.length > 0 ? (
           <div className="flex flex-wrap justify-center items-center w-[90%] mx-auto">

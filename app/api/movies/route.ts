@@ -31,6 +31,7 @@ function getMoviesRecursively(dir: string) {
 }
 
 export async function GET() {
+  
   const movies = getMoviesRecursively(MOVIE_DIR);
 
   return NextResponse.json(movies);

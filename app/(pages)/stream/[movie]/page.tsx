@@ -35,7 +35,7 @@ export default function StreamPage({ params }: { params: { movie: string } }) {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#fdfdfd] mx-auto px-4 py-8">
+    <div className="min-h-screen flex flex-col bg-[#fdfdfd] mx-auto justify-between items-center px-4 py-8">
       <nav className="flex w-full flex-row justify-between items-center py-5">
         <a
           href="https://www.adithyakrishnan.com"
@@ -78,6 +78,7 @@ export default function StreamPage({ params }: { params: { movie: string } }) {
           ))}
         </aside>
       </main>
+      <div></div>
     </div>
   );
 }

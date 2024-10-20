@@ -7,7 +7,7 @@ interface MovieListBoxProps {
 }
 
 export default function MovieListBox({ name, thumbnail }: MovieListBoxProps) {
-  const formattedName = name.replaceAll("@CV","").replaceAll("@","").replaceAll("."," ");
+  const formattedName = name.replaceAll("@CV","").replaceAll("@","").replaceAll("."," ").replaceAll("_"," ").replaceAll("[MZM]"," ");
 
   return (
     <div className="w-[80vw] md:w-[20vw] m-2 bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer group">
@@ -32,7 +32,7 @@ export default function MovieListBox({ name, thumbnail }: MovieListBoxProps) {
       <div className="p-4">
         <h2 className="text-lg font-semibold text-gray-800 truncate">{formattedName}</h2>
         <p className="text-sm text-gray-500 mt-1">
-          {new Date().getFullYear()} • Movie
+          {new Date().getFullYear()} • Video File
         </p>
       </div>
     </div>
