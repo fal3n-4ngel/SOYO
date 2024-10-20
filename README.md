@@ -38,6 +38,10 @@ Install Dependencies:
 npm install
 
 ```
+Create .env.local
+```env
+MOVIE_DIR=F:/
+```
 ## Run the Development Server:
 ```bash
 npm run dev

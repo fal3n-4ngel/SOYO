@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
 
-const MOVIE_DIR = 'F:/';
+const MOVIE_DIR = process.env.MOVIE_DIR || 'F:/'; // Default to 'F:/' if not set
 
 function getMoviesRecursively(dir: string) {
   let results: { name: string; thumbnail: string }[] = [];

@@ -2,7 +2,7 @@ import fs from "fs";
 import { NextRequest, NextResponse } from "next/server";
 import { Readable } from "stream";
 
-const MOVIE_DIR = "F:/";
+const MOVIE_DIR = process.env.MOVIE_DIR || 'F:/'; // Default to 'F:/' if not set
 // function for fetching the thumbnail images.
 export async function GET(
   request: NextRequest,

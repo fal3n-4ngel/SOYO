@@ -6,7 +6,7 @@ import path from 'path'
 import { Readable } from 'stream'
 
 
-const MOVIE_DIR = 'F:/'
+const MOVIE_DIR = process.env.MOVIE_DIR || 'F:/'; // Default to 'F:/' if not set
 
 export async function GET(
   request: NextRequest,
