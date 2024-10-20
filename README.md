@@ -18,7 +18,7 @@ Styling: Tailwind CSS
 <img src="https://github.com/user-attachments/assets/097fabb7-ae2f-4988-bfb0-5469a590900e" alt="Laptop view" width="800"/>
 <p>
   <img src="https://github.com/user-attachments/assets/9fdab3ef-1bad-4f3c-a946-ffd3a8ac167f" alt="Mobile view" width="20%" align="center"/>
-<img src="https://github.com/user-attachments/assets/b2081f29-58ec-4130-9749-927c6fb35970" alt="Mobile view" width="75%" align="right"/>
+<img src="https://github.com/user-attachments/assets/b2081f29-58ec-4130-9749-927c6fb35970" alt="Mobile view" width="74%" align="center"/>
 </p>
 
 
