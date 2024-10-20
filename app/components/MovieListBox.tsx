@@ -1,4 +1,5 @@
 import React from "react";
+import { Play, Info } from 'lucide-react';
 
 interface MovieListBoxProps {
   name: string;
@@ -6,19 +7,34 @@ interface MovieListBoxProps {
 }
 
 export default function MovieListBox({ name, thumbnail }: MovieListBoxProps) {
+  const formattedName = name.replaceAll("@CV","").replaceAll("@","").replaceAll("."," ");
+
   return (
-    <div className="w-[80vw] md:w-[300px] m-2 flex flex-col justify-between items-center bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden cursor-pointer p-4">
+    <div className="w-[80vw] md:w-[20vw] m-2 bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer group">
       {/* Movie Thumbnail */}
-      <div className="w-full aspect-[16/9] overflow-hidden rounded-lg bg-gray-100 mb-3">
-        <img src={thumbnail} alt={name} className="w-full h-full object-cover" />
+      <div className="relative w-full aspect-[16/9] overflow-hidden bg-gray-200">
+        <img 
+          src={thumbnail} 
+          alt={formattedName} 
+          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+        />
+        <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-60 transition-all duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100">
+          <button className="bg-white text-black rounded-full p-3 mx-2 hover:bg-opacity-90 transition-all duration-200">
+            <Play size={24} />
+          </button>
+          <button className="bg-white text-black rounded-full p-3 mx-2 hover:bg-opacity-90 transition-all duration-200">
+            <Info size={24} />
+          </button>
+        </div>
       </div>
 
       {/* Movie Title */}
-      <div className="w-full text-center mb-2">
-        <h2 className="text-base font-medium text-gray-700 truncate text-justify">{name.replaceAll("@CV","").replaceAll("@","").replaceAll("."," ")}</h2>
+      <div className="p-4">
+        <h2 className="text-lg font-semibold text-gray-800 truncate">{formattedName}</h2>
+        <p className="text-sm text-gray-500 mt-1">
+          {new Date().getFullYear()} • Movie
+        </p>
       </div>
-
-   
     </div>
   );
 }
