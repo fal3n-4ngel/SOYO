@@ -1,36 +1,65 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Soyo
+## What is Soyo?
+Soyo is a Next.js website designed to display video files stored on a local drive (default: F:/). The website is accessible throughout the local network, providing a convenient way to browse and view videos without needing a central server.
 
-## Getting Started
-
-First, run the development server:
-
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## Technical Details
+```
+Framework: Next.js
+Styling: Tailwind CSS
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Features
+- Displays all video files from the specified local drive.
+- Accessible across devices on the same local network.
+- User-friendly interface for easy navigation and viewing.
+### Screenshots
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+<img src="https://github.com/user-attachments/assets/097fabb7-ae2f-4988-bfb0-5469a590900e" alt="Laptop view" width="800"/>
+<p>
+  <img src="https://github.com/user-attachments/assets/9fdab3ef-1bad-4f3c-a946-ffd3a8ac167f" alt="Mobile view" width="20%" align="center"/>
+<img src="https://github.com/user-attachments/assets/b2081f29-58ec-4130-9749-927c6fb35970" alt="Mobile view" width="75%" align="right"/>
+</p>
 
-## Learn More
 
-To learn more about Next.js, take a look at the following resources:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+  
+## Instructions to Run the Project
+Clone the Repository:
+```bash
 
-## Deploy on Vercel
+git clone https://github.com/fal3n-4ngel/soyo.git
+cd soyo
+```
+Install Dependencies:
+```bash
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+npm install
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```
+## Run the Development Server:
+```bash
+npm run dev
+```
+
+## Access the Website: 
+
+Open your browser and navigate to http://{ip}:3000 or to view the website.
+
+# Contributors
+
+<table>
+<tr>
+    <td align="center">
+        <a href="https://github.com/fal3n-4ngel">
+            <img src="https://avatars.githubusercontent.com/u/79042374?v=4" width="100;" alt="Jes-ny"/>
+            <br />
+            <sub><b>Adithya Krishnan</b></sub>
+        </a>
+    </td>
+   </tr>
+</table>
+
+## License
+This project is open-source and available under the MIT License.
