@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import ReactPlayer from 'react-player';
 import { Play, Pause, Volume2, VolumeX, Maximize, Minimize, SkipBack, SkipForward, RotateCcw } from 'lucide-react';
@@ -18,12 +18,12 @@ export default function EnhancedVideoPlayer({ movie }: { movie: string }) {
 
   const decodedMovie = decodeURIComponent(movie);
 
-  const togglePlay = () => setPlaying(!playing);
-  const toggleMute = () => setMuted(!muted);
-  const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const togglePlay = useCallback(() => setPlaying((prev) => !prev), []);
+  const toggleMute = useCallback(() => setMuted((prev) => !prev), []);
+  const handleVolumeChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setVolume(parseFloat(e.target.value));
     setMuted(false);
-  };
+  }, []);
 
   const toggleFullscreen = useCallback(() => {
     if (!document.fullscreenElement) {
@@ -35,56 +35,57 @@ export default function EnhancedVideoPlayer({ movie }: { movie: string }) {
     }
   }, []);
 
-  const handleProgress = (state: { played: number }) => {
+  const handleProgress = useCallback((state: { played: number }) => {
     setProgress(state.played);
-  };
+  }, []);
 
-  const handleDuration = (duration: number) => {
+  const handleDuration = useCallback((duration: number) => {
     setDuration(duration);
-  };
+  }, []);
 
-  const handleSeekChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSeekChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const time = parseFloat(e.target.value);
     setProgress(time);
     playerRef.current?.seekTo(time);
-  };
+  }, []);
 
-  const handleSkip = (seconds: number) => {
-    const player = playerRef.current;
-    if (player) {
-      const currentTime = player.getCurrentTime();
-      player.seekTo(currentTime + seconds);
-    }
-  };
+  const handleSkip = useCallback((seconds: number) => {
+    const currentTime = playerRef.current?.getCurrentTime() || 0;
+    playerRef.current?.seekTo(currentTime + seconds);
+  }, []);
 
-  const handleRestart = () => {
+  const handleRestart = useCallback(() => {
     playerRef.current?.seekTo(0);
     setPlaying(true);
-  };
+  }, []);
 
-  const handleError = (e: Error) => {
+  const handleError = useCallback((e: Error) => {
     console.error("Error loading video:", e);
     setError("Error loading video. Please try again later.");
-  };
+  }, []);
 
-  const formatTime = (time: number) => {
+  const formatTime = useCallback((time: number) => {
+    if (!isFinite(time)) return '0:00';
     const minutes = Math.floor(time / 60);
     const seconds = Math.floor(time % 60);
     return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-  };
-
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    if(!document.fullscreenElement){
+      setFullscreen(false);
+    }
+    return () => window.removeEventListener('resize', checkMobile);
+   
+  }, []);
+ 
+
   return (
-    <div className="w-[95vw] md:max-w-[60vw] mx-auto overflow-hidden" ref={containerRef}>
-      <div className="relative w-full bg-black rounded-xl overflow-hidden">
+    <div className="flex h-full flex-col w-[95vw] md:max-w-[60vw] mx-auto overflow-hidden" ref={containerRef}>
+      <div className={`relative w-full bg-black rounded-xl overflow-hidden  ${fullscreen ? "min-h-full" : "min-h-fit"}`}>
         {error ? (
           <div className="w-full h-full flex items-center justify-center bg-black text-white">
             {error}
@@ -161,7 +162,12 @@ export default function EnhancedVideoPlayer({ movie }: { movie: string }) {
         </div>
       </div>
       <h2 className="text-lg sm:text-xl font-semibold mt-2 sm:mt-4 text-[#1d1d1d] flex">
-        {decodedMovie.replaceAll("_"," ").replaceAll("@"," ").replaceAll("."," ").replaceAll("[MZM]"," ").replaceAll("mkv"," ").replaceAll("mp4"," ").replaceAll("avi"," ").replaceAll("CV"," ")}
+        {decodedMovie
+          .replaceAll("_", " ")
+          .replaceAll("@", " ")
+          .replaceAll(".", " ")
+          .replaceAll("[MZM]", " ")
+          .replace(/\.(mkv|mp4|avi|CV)/g, " ")}
       </h2>
     </div>
   );

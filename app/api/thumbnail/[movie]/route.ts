@@ -50,7 +50,7 @@ export async function GET(
       
       "Content-Type": "image/jpeg",
     };
-    const thumbnailFile = fs.createReadStream("F:/thumbnails/default.jpg");
+    const thumbnailFile = fs.createReadStream(`${MOVIE_DIR}/thumbnails/default.jpg`);
     return new NextResponse(Readable.toWeb(thumbnailFile) as ReadableStream, {
       status: 200,
       headers: head,
