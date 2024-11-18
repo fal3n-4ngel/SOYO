@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import VideoPlayer from "@/app/components/VideoPlayer";
 import Link from 'next/link';
-import { Sun, Moon} from 'lucide-react';
+
 
 interface Movie {
   name: string;
@@ -52,11 +52,7 @@ export default function StreamPage({ params }: { params: { movie: string } }) {
     return () => clearTimeout(timer);
   }, [decodedMovie]);
 
-  const toggleTheme = () => {
-    const newMode = !isDarkMode;
-    setIsDarkMode(newMode);
-    localStorage.setItem('isDarkMode', JSON.stringify(newMode));
-  };
+ 
 
   const formatTitle = (name: string) => {
     return name
