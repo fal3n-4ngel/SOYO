@@ -27,7 +27,7 @@ export default function StreamPage({ params }: { params: { movie: string } }) {
     );
   }
   return (
-    <div className="w-full min-h-screen bg-[#fdfdfd] mx-auto px-4 py-8 ">
+    <div className="w-full min-h-screen bg-[#fdfdfd] mx-auto px-4 py-8 overflow-x-hidden">
       <div className="mb-4">
         <h1 className="text-xl font-bold mb-4 text-center text-black">{decodedMovie}</h1>
       </div>

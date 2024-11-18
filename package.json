@@ -5,10 +5,11 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
+    "start": "next start -p 8311",
     "lint": "next lint"
   },
   "dependencies": {
+    "@radix-ui/react-switch": "^1.1.1",
     "fluent-ffmpeg": "^2.1.3",
     "framer-motion": "^11.11.9",
     "lucide-react": "^0.453.0",

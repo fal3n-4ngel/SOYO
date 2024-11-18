@@ -19,10 +19,13 @@ function getMoviesRecursively(dir: string) {
     } else {
       // If it's a movie file, add it to the results
       if (file.endsWith('.mp4') || file.endsWith('.avi') || file.endsWith('.mkv')) {
+        if(file[0]=='$'){}
+        else{
         results.push({
           name: file,
           thumbnail: `/api/thumbnail/${encodeURIComponent(file)}`,
         });
+      }
       }
     }
   });

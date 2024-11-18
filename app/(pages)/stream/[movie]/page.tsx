@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import VideoPlayer from "@/app/components/VideoPlayer";
 import Link from 'next/link';
+import { Sun, Moon} from 'lucide-react';
 
 interface Movie {
   name: string;
@@ -12,6 +13,15 @@ export default function StreamPage({ params }: { params: { movie: string } }) {
   const decodedMovie = decodeURIComponent(params.movie);
   const [isLoading, setIsLoading] = useState(true);
   const [upNext, setUpNext] = useState<Movie[]>([]);
+  const [isDarkMode, setIsDarkMode] = useState(true);
+
+  // Load dark mode preference from localStorage
+  useEffect(() => {
+    const storedDarkMode = localStorage.getItem('isDarkMode');
+    if (storedDarkMode !== null) {
+      setIsDarkMode(JSON.parse(storedDarkMode));
+    }
+  }, []);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -20,65 +30,127 @@ export default function StreamPage({ params }: { params: { movie: string } }) {
 
     fetch('/api/movies')
       .then(response => response.json())
-      .then(data => setUpNext(data.filter((movie: { name: string; }) => movie.name !== decodedMovie).slice(0, 3)))
+      .then(data => {
+        const filteredMovies = data
+          .filter((movie: { name: string; }) => movie.name !== decodedMovie)
+          .slice(0, 5);
+        setUpNext(filteredMovies);
+        
+        // Update recently watched in localStorage
+        const recentlyWatched = JSON.parse(localStorage.getItem('recentlyWatched') || '[]');
+        const currentMovie = data.find((m: { name: string; }) => m.name === decodedMovie);
+        if (currentMovie) {
+          const updatedRecent = [
+            currentMovie,
+            ...recentlyWatched.filter((m: Movie) => m.name !== currentMovie.name)
+          ].slice(0, 10);
+          localStorage.setItem('recentlyWatched', JSON.stringify(updatedRecent));
+        }
+      })
       .catch(error => console.error('Error fetching up next videos:', error));
 
     return () => clearTimeout(timer);
   }, [decodedMovie]);
 
+  const toggleTheme = () => {
+    const newMode = !isDarkMode;
+    setIsDarkMode(newMode);
+    localStorage.setItem('isDarkMode', JSON.stringify(newMode));
+  };
+
+  const formatTitle = (name: string) => {
+    return name
+      .replaceAll("_", " ")
+      .replaceAll("@", " ")
+      .replaceAll(".", " ")
+      .replaceAll("[MZM]", " ")
+      .replaceAll("mkv", " ")
+      .replaceAll("mp4", " ")
+      .replaceAll("avi", " ")
+      .replaceAll("CV", " ")
+      .trim();
+  };
+
   if (isLoading) {
     return (
-      <div className="w-full min-h-screen flex flex-col justify-center items-center bg-[#fdfdfd]">
+      <div className={`w-full min-h-screen flex flex-col justify-center items-center ${
+        isDarkMode ? 'bg-[#141414] text-white' : 'bg-white text-black'
+      }`}>
         <div className="w-24 h-24 border-4 border-current rounded-full animate-spin"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#fdfdfd] mx-auto justify-between items-center px-4 py-8">
-      <nav className="flex w-full flex-row justify-between items-center py-5">
-        <a
-          href="https://www.adithyakrishnan.com"
-          className="md:w-[200px] text-black playwrite md:flex hidden"
-        >
-          ©️fal3n-4ngel
-        </a>
-        <div className="flex flex-col justify-center items-center md:w-[300px]">
-          <a href="/" className="text-[#1d1d1d] font-semibold md:text-3xl dancing-script">
-            SOYO
-          </a>
-        </div>
-        <div className="max-w-[200px] relative md:w-[200px] h-fit">
-        <a
-          href="https://www.adithyakrishnan.com"
-          className="md:w-[200px] text-black playwrite md:hidden flex "
-        >
-          ©️fal3n-4ngel
-        </a>
+    <div className={`min-h-screen transition-colors duration-300 bg-[#fdfdfd]`}>
+  <nav className={`fixed bg-[#fdfdfd] w-full  z-[50] max-w-screen overflow-x-hidden transition-all duration-300 `}>
+        <div className="flex items-start md:justify-between md:gap-0 gap-4 justify-start px-6 py-4">
+          <div className="flex items-center space-x-8">
+            <a href="/" className={`text-3xl dancing-script font-bold text-black`}>
+              SOYO
+            </a>
+            <div className={`hidden md:flex space-x-6 text-black`}>
+              <Link href="/" className="hover:text-blue-900">Home</Link>
+              <Link href="/#continue" className="hover:text-blue-900">Continue</Link>
+              <Link href="/#explore" className="hover:text-blue-900">Explore</Link>
+           
+            </div>
+          </div>
+
+        
+            
+            
+        
         </div>
       </nav>
 
-      <main className="flex flex-col md:flex-row gap-8 mt-8">
-        <div className="w-full md:w-3/4">
-          <VideoPlayer movie={params.movie} />
+      <main className="flex flex-col md:flex-row gap-8 p-6">
+        <div className="w-full md:w-3/4 space-y-4 mt-20">
+          <div className={`rounded-lg overflow-hidden `}>
+            <VideoPlayer movie={params.movie} />
+          </div>
           
+        
         </div>
 
-        <aside className="w-full md:w-1/4 overflow-hidden">
-          <h3 className="text-lg font-semibold mb-4 text-[#1d1d1d]">Up next</h3>
-          {upNext.map((video, index) => (
-            <Link href={`/stream/${encodeURIComponent(video.name)}`} key={index}>
-              <div className="flex mb-4 hover:bg-gray-100 p-2 rounded transition duration-300 cursor-pointer">
-                <img src={video.thumbnail} alt={video.name} className="w-40 h-24 object-cover rounded" />
-                <div className="ml-2">
-                  <p className="font-semibold text-[#1d1d1d]">{video.name.replaceAll("_"," ").replaceAll("@"," ").replaceAll("."," ").replaceAll("[MZM]"," ").replaceAll("mkv"," ").replaceAll("mp4"," ").replaceAll("avi"," ").replaceAll("CV"," ")}</p>
+        <aside className="w-full md:w-1/4">
+          <h3 className={`text-lg font-medium mb-4 ${
+            isDarkMode ? 'text-gray-300' : 'text-gray-700'
+          }`}>
+            Up Next
+          </h3>
+          <div className="space-y-4">
+            {upNext.map((video, index) => (
+              <Link 
+                href={`/stream/${encodeURIComponent(video.name)}`} 
+                key={index}
+                className={`block rounded-lg overflow-hidden transition-all duration-300 ${
+                  isDarkMode 
+                    ? 'hover:bg-gray-800/50' 
+                    : 'hover:bg-gray-100'
+                }`}
+              >
+                <div className="flex gap-3 p-2">
+                  <div className="w-40 h-24 rounded-md overflow-hidden flex-shrink-0">
+                    <img 
+                      src={video.thumbnail} 
+                      alt={video.name} 
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div className="flex-grow min-w-0">
+                    <p className={`font-medium line-clamp-2 ${
+                      isDarkMode ? 'text-gray-300' : 'text-gray-700'
+                    }`}>
+                      {formatTitle(video.name)}
+                    </p>
+                  </div>
                 </div>
-              </div>
-            </Link>
-          ))}
+              </Link>
+            ))}
+          </div>
         </aside>
       </main>
-      <div></div>
     </div>
   );
 }

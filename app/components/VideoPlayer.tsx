@@ -12,9 +12,11 @@ export default function EnhancedVideoPlayer({ movie }: { movie: string }) {
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
+  const [videoHeight, setVideoHeight] = useState("56.25%"); // 16:9 aspect ratio
 
   const playerRef = useRef<ReactPlayer>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null);
 
   const decodedMovie = decodeURIComponent(movie);
 
@@ -72,22 +74,56 @@ export default function EnhancedVideoPlayer({ movie }: { movie: string }) {
   }, []);
 
   useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    const checkMobile = () => {
+      const isMobileView = window.innerWidth < 768;
+      setIsMobile(isMobileView);
+      
+      // Adjust container size based on screen
+      if (containerRef.current && wrapperRef.current) {
+        if (fullscreen) {
+          setVideoHeight("100vh");
+        } else {
+          const aspectRatio = isMobileView ? "56.25%" : "56.25%"; // 16:9 aspect ratio
+          setVideoHeight(aspectRatio);
+        }
+      }
+    };
+    
     checkMobile();
     window.addEventListener('resize', checkMobile);
-    if(!document.fullscreenElement){
-      setFullscreen(false);
-    }
-    return () => window.removeEventListener('resize', checkMobile);
-   
-  }, []);
- 
+    
+    // Handle fullscreen changes
+    const handleFullscreenChange = () => {
+      if (!document.fullscreenElement) {
+        setFullscreen(false);
+        checkMobile();
+      }
+    };
+    
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    
+    return () => {
+      window.removeEventListener('resize', checkMobile);
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    };
+  }, [fullscreen]);
 
   return (
-    <div className="flex h-full flex-col w-[95vw] md:max-w-[60vw] mx-auto overflow-hidden" ref={containerRef}>
-      <div className={`relative w-full bg-black rounded-xl overflow-hidden  ${fullscreen ? "min-h-full" : "min-h-fit"}`}>
+    <div 
+      className={`flex flex-col w-full max-w-[1600px] mx-auto px-4 ${
+        fullscreen ? 'h-screen' : ''
+      }`}
+      ref={containerRef}
+    >
+      <div 
+        ref={wrapperRef}
+        className={`relative w-full rounded-xl overflow-hidden bg-black ${
+          fullscreen ? 'h-screen' : ''
+        }`}
+        style={{ paddingTop: fullscreen ? '0' : videoHeight }}
+      >
         {error ? (
-          <div className="w-full h-full flex items-center justify-center bg-black text-white">
+          <div className="absolute inset-0 flex items-center justify-center text-white">
             {error}
           </div>
         ) : (
@@ -102,10 +138,19 @@ export default function EnhancedVideoPlayer({ movie }: { movie: string }) {
             onError={handleError}
             onProgress={handleProgress}
             onDuration={handleDuration}
-            className=""
-            fallback={<div className="w-full h-full  bg-black flex items-center justify-center text-white">Loading...</div>}
+            className={`absolute top-0 left-0 ${
+              fullscreen ? 'h-full' : ''
+            }`}
+            style={{ position: 'absolute', top: 0, left: 0 }}
+            fallback={
+              <div className="absolute inset-0 flex items-center justify-center text-white">
+                Loading...
+              </div>
+            }
           />
         )}
+        
+        {/* Controls Overlay */}
         <div className="absolute bottom-0 left-0 right-0 p-2 sm:p-4 bg-gradient-to-t from-black to-transparent">
           <input
             type="range"
@@ -114,7 +159,7 @@ export default function EnhancedVideoPlayer({ movie }: { movie: string }) {
             step="any"
             value={progress}
             onChange={handleSeekChange}
-            className="w-full mb-2"
+            className="w-full mb-2 accent-violet-500"
           />
           <div className="flex flex-row items-center justify-between text-white">
             <div className="flex items-center space-x-1 sm:space-x-2">
@@ -150,7 +195,7 @@ export default function EnhancedVideoPlayer({ movie }: { movie: string }) {
                     step={0.1}
                     value={muted ? 0 : volume}
                     onChange={handleVolumeChange}
-                    className="w-24 sm:w-32 h-2 ml-2"
+                    className="w-24 sm:w-32 h-2 ml-2 accent-violet-500"
                   />
                 )}
               </div>
@@ -161,7 +206,8 @@ export default function EnhancedVideoPlayer({ movie }: { movie: string }) {
           </div>
         </div>
       </div>
-      <h2 className="text-lg sm:text-xl font-semibold mt-2 sm:mt-4 text-[#1d1d1d] flex">
+      
+      <h2 className="text-lg sm:text-xl font-semibold mt-4 text-gray-800">
         {decodedMovie
           .replaceAll("_", " ")
           .replaceAll("@", " ")
