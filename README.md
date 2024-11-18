@@ -48,9 +48,15 @@ MOVIE_DIR=F:/
 npm run dev
 ```
 
+## Run the Production Server:
+```bash
+npm run build
+npm run start
+```
+
 ## Access the Website: 
 
-Open your browser and navigate to http://{ip}:3000 or to view the website.
+Open your browser and navigate to http://{ip}:3000 (if dev) http://{ip}:8311(if prod)  or to view the website.
 
 # Contributors
 
