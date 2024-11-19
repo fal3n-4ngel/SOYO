@@ -14,18 +14,10 @@ Styling: Tailwind CSS
 - User-friendly interface for easy navigation and viewing.
 ### Screenshots
 
-<img src="https://github.com/user-attachments/assets/e3f5eb97-e215-4439-8cb1-0c66e7744b27" alt="Laptop view" width="800"/>
-
-
-
-
-<p>
-  <img src="https://github.com/user-attachments/assets/80e48c38-e717-4e62-ac7c-b7be5f41886d" alt="Mobile view" width="20%" align="center"/>
-  <img src="https://github.com/user-attachments/assets/fd5eb887-87dc-4b41-aca4-76c74cee7c52" alt="Mobile view" width="75%" align="center"/>
-</p>
-
-
-
+<img src="https://github.com/user-attachments/assets/8784693b-1431-46cd-8b0e-d98147396aa4" alt="Laptop view" width="400"/>
+<img src="https://github.com/user-attachments/assets/1d6fa291-4c01-4f1c-969a-7ad48e23afd7" alt="Mobile view" width="400" />
+<img src="https://github.com/user-attachments/assets/71ded133-e511-4163-880a-6ba4ee883d36" alt="Mobile view" width="400" />
+<img src="https://github.com/user-attachments/assets/295fdda8-6a8b-4a76-b819-a387ca6beb20" alt="Laptop view" width="400"/>
 
   
 ## Instructions to Run the Project
@@ -50,9 +42,28 @@ MOVIE_DIR=F:/
 npm run dev
 ```
 
+## Run the Production Server:
+```bash
+npm run build
+npm run start
+```
+
 ## Access the Website: 
 
-Open your browser and navigate to http://{ip}:3000 or to view the website.
+Open your browser and navigate to 
+```bash
+http://{ip}:3000   # if Development Server
+``` 
+```bash 
+http://{ip}:8311   # if Production Server
+```
+ to view the website.
+
+## Troubleshooting
+Create or edit .env.local
+```env
+MOVIE_DIR=F:/ <- your movie directory here
+```
 
 # Contributors
 
