@@ -12,11 +12,16 @@ Styling: Tailwind CSS
 - Displays all video files from the specified local drive.
 - Accessible across devices on the same local network.
 - User-friendly interface for easy navigation and viewing.
+- Fetches anime thumbnails from AniList API to display cover images for videos (if available).
+- Fallback to local thumbnails if no external thumbnail is found.
+- Ability to fetch movie/poster images from IMDb using OMDb API for non-anime videos.
+
 ### Screenshots
+
 
 <img src="https://github.com/user-attachments/assets/8784693b-1431-46cd-8b0e-d98147396aa4" alt="Laptop view" width="400"/>
 <img src="https://github.com/user-attachments/assets/1d6fa291-4c01-4f1c-969a-7ad48e23afd7" alt="Mobile view" width="400" />
-<img src="https://github.com/user-attachments/assets/71ded133-e511-4163-880a-6ba4ee883d36" alt="Mobile view" width="400" />
+<img src="https://github.com/user-attachments/assets/834900fc-00ad-43fb-9892-fa55fc1d6e6e" alt="Mobile view" width="400" />
 <img src="https://github.com/user-attachments/assets/295fdda8-6a8b-4a76-b819-a387ca6beb20" alt="Laptop view" width="400"/>
 
   
@@ -33,10 +38,15 @@ Install Dependencies:
 npm install
 
 ```
-Create .env.local
-```env
-MOVIE_DIR=F:/
+Create or edit config.json
+```json
+{
+  "movieDir": "F:/",
+  "thumbnailCache": false,
+  "lastAccessedMovie": null
+}
 ```
+
 ## Run the Development Server:
 ```bash
 npm run dev
@@ -60,9 +70,13 @@ http://{ip}:8311   # if Production Server
  to view the website.
 
 ## Troubleshooting
-Create or edit .env.local
-```env
-MOVIE_DIR=F:/ <- your movie directory here
+Create or edit config.json
+```json
+{
+  "movieDir": "F:/",
+  "thumbnailCache": false,
+  "lastAccessedMovie": null
+}
 ```
 
 # Contributors
