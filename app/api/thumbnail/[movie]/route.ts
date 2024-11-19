@@ -43,10 +43,11 @@ async function fetchAniListThumbnail(movieName: string) {
 
 function cleanMovieName(movieName) {
   // Remove common video file extensions (.mkv, .mp4, .avi, etc.)
-  let cleanedName = movieName.replace(/\.(mkv|mp4|avi|flv|webm|mov|wmv|_|.|\+|)$/i, '').trim();
+  
+  let cleanedName = movieName.replace(/\.(mkv|mp4|avi|flv|webm|mov|wmv|_|.|\+|-|-mkv|)$/i, '').trim();
   
   // Remove resolution details (720p, 1080p, etc.)
-  cleanedName = cleanedName.replace(/\b(720p|1080p|4K|HD|SD|BluRay|BRRip|HDRip)\b/g, '').trim();
+  cleanedName = cleanedName.replace(/\b(720p|1080p|480p|HEVC|4K|HD|SD|BluRay|BRRip|HDRip)\b/g, '').trim();
   
   // Remove language, format, codec, and other unnecessary details
   cleanedName = cleanedName.replace(/\b(Hindi|English|Tamil|Telugu|ESub|AAC|x264|x265|HEVC|WEB-DL|BluRay|Org|VCD|YIFY|YTS|AMZN|BiGiL)\b/g, '').trim();
