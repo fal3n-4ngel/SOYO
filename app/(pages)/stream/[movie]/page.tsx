@@ -110,9 +110,9 @@ export default function StreamPage({ params }: { params: { movie: string } }) {
         </div>
 
         <aside className="w-full md:w-1/4">
-          <h3 className={`text-lg font-medium mb-4 ${
-            isDarkMode ? 'text-gray-300' : 'text-gray-700'
-          }`}>
+          <h3 className={`text-lg font-medium mb-4 mt-10 
+            text-black
+          `}>
             Up Next
           </h3>
           <div className="space-y-4">
@@ -120,11 +120,7 @@ export default function StreamPage({ params }: { params: { movie: string } }) {
               <Link 
                 href={`/stream/${encodeURIComponent(video.name)}`} 
                 key={index}
-                className={`block rounded-lg overflow-hidden transition-all duration-300 ${
-                  isDarkMode 
-                    ? 'hover:bg-gray-800/50' 
-                    : 'hover:bg-gray-100'
-                }`}
+                className={`block rounded-lg overflow-hidden transition-all duration-300 `}
               >
                 <div className="flex gap-3 p-2">
                   <div className="w-40 h-24 rounded-md overflow-hidden flex-shrink-0">
@@ -135,9 +131,7 @@ export default function StreamPage({ params }: { params: { movie: string } }) {
                     />
                   </div>
                   <div className="flex-grow min-w-0">
-                    <p className={`font-medium line-clamp-2 ${
-                      isDarkMode ? 'text-gray-300' : 'text-gray-700'
-                    }`}>
+                    <p className={`font-medium line-clamp-2 text-gray-700`}>
                       {formatTitle(video.name)}
                     </p>
                   </div>

@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Search, Play, Info, GithubIcon } from "lucide-react";
+import { Folder, Search, Play, GithubIcon } from "lucide-react";
 
 interface Movie {
   name: string;
@@ -41,6 +41,7 @@ const MovieRowContinue = ({
                   <p className={`mt-2 text-sm text-gray-700  `}>
                     {movie.name
                       .replaceAll("-", " ")
+                      .replaceAll(".", " ")
                       .replace(".mp4", "")
                       .replace(".avi", "")
                       .replace(".mkv", "")
@@ -89,6 +90,7 @@ const MovieRow = ({
                 {movie.name
                   .replaceAll("-", " ")
                   .replace(".mp4", "")
+                  .replaceAll(".", " ")
                   .replace(".avi", "")
                   .replace(".mkv", "")
                   .replaceAll("_", " ")}
@@ -110,6 +112,39 @@ export default function MovieList() {
 
   const [recentlyWatched, setRecentlyWatched] = useState<Movie[]>([]);
   const [isSearching, setIsSearching] = useState(false);
+  const [selectedPath, setSelectedPath] = useState("");
+
+  const handlePathSelection = async () => {
+    try {
+      const response = await fetch("/api/movies", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          movieDir: selectedPath || localStorage.getItem("MOVIE_DIR") || "G:/",
+        }),
+      });
+
+      if (!response.ok) throw new Error("Failed to update movie directory");
+
+      localStorage.setItem("MOVIE_DIR", selectedPath);
+      console.log("Path set to:", selectedPath);
+
+      // Refresh movies after setting new path
+      const moviesResponse = await fetch("/api/movies");
+      if (!moviesResponse.ok) throw new Error("Failed to fetch movies");
+
+      const data = await moviesResponse.json();
+      setMovies(data);
+      setFilteredMovies(data);
+      // Reload the page
+      window.location.reload();
+    } catch (error) {
+      console.error("Error selecting directory:", error);
+      alert("An error occurred while selecting directory");
+    }
+  };
 
   useEffect(() => {
     fetch(`/api/movies`)
@@ -123,7 +158,6 @@ export default function MovieList() {
         // Simulate recently watched by taking last 5 movies
         const value = data.slice(-Math.min(Math.floor(Math.random() * 6), 5));
         setRecentlyWatched(value);
-        
       })
       .catch((err) => setError(err.message));
   }, []);
@@ -148,34 +182,56 @@ export default function MovieList() {
         className={`flex items-center justify-center h-screen bg-[#fdfdfd] w-full`}
       >
         <div className=" w-full h-full  flex items-center justify-center px-6 md:px-12">
-              <div className="w-full space-y-6 flex-col justify-center items-center ">
-                <div className="flex flex-col gap-4 justify-start items-center">
-                  <img src="/logo.png" alt="SOYO" className="w-[200px]" />
-                  <h1 className="text-5xl md:text-9xl font-bold dancing-script text-black">
-                    SOYO
-                  </h1>
-                </div>
-              <div className="w-full flex flex-col gap-4 justify-center items-center">
+          <div className="w-full space-y-6 flex-col justify-center items-center ">
+            <div className="flex flex-col gap-4 justify-start items-center">
+              <img src="/logo.png" alt="SOYO" className="w-[200px]" />
+              <h1 className="text-5xl md:text-9xl font-bold dancing-script text-black">
+                SOYO
+              </h1>
+            </div>
+            <div className="w-full flex flex-col gap-4 justify-center items-center">
               <p className="text-5xl text-red-400 max-w-xl text-center quicksand ">
-                Failed to fetch movies 
-                </p>
-                <p className="text-xl text-black py-2">Please verify the file location specified in   <code className="code-highlight">.env.local</code>.</p>
+                Failed to fetch movies
+              </p>
+              <p className="text-xl text-black py-2">
+                Please verify the file location specified in{" "}
+                <code className="code-highlight">.env.local</code>.
+              </p>
+              <div className="flex md:flex-row flex-col space-x-4">
+                <a
+                  href={`https://github.com/fal3n-4ngel/SOYO`}
+                  className="flex items-center space-x-2 px-8 py-3 bg-black text-white rounded-md hover:bg-gray-200 transition-colors duration-300"
+                >
+                  <GithubIcon size={24} />
+                  <span>Github</span>
+                </a>
                 <div className="flex space-x-4">
-                  <a
-                    href={`https://github.com/fal3n-4ngel/SOYO`}
-                    className="flex items-center space-x-2 px-8 py-3 bg-black text-white rounded-md hover:bg-gray-200 transition-colors duration-300"
+                  <div className="flex items-center space-x-2 px-4 py-3 bg-gray-100 rounded-md">
+                    <input
+                      type="text"
+                      value={selectedPath}
+                      onChange={(e) => setSelectedPath(e.target.value)}
+                      list="drives"
+                      placeholder="Enter movie directory path"
+                      className="w-full bg-transparent outline-none text-black"
+                    />
+                    <datalist id="drives">
+                      <option value="E:/">E Drive</option>
+                      <option value="F:/">F Drive</option>
+                      <option value="G:/">G Drive</option>
+                    </datalist>
+                  </div>
+                  <button
+                    onClick={handlePathSelection}
+                    className="flex items-center justify-center w-12 h-12 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-colors duration-300"
                   >
-                    <GithubIcon size={24} />
-                    <span>Github</span>
-                  </a>
-                  <button className="flex items-center space-x-2 px-8 py-3 bg-gray-500/70 text-white rounded-md hover:bg-gray-500/90 transition-colors duration-300">
-                    <Info size={24} />
-                    <span>Readme</span>
+                    <Folder size={24} />
                   </button>
                 </div>
               </div>
-              </div>
             </div>
+          </div>
+        </div>
       </div>
     );
 
@@ -247,26 +303,45 @@ export default function MovieList() {
                     SOYO
                   </h1>
                 </div>
-              <div className="w-full flex flex-col gap-4 justify-center items-center">
-              <p className="text-lg text-gray-700 max-w-xl text-center playwrite">
-                  Stream your favorite movies with SOYO - your personal
-                  streaming service that lets you enjoy your media collection
-                  anywhere in your home.
-                </p>
-                <div className="flex space-x-4 z-[10]">
-                  <a
-                    href="https://github.com/fal3n-4ngel/SOYO"
-                    className="  flex items-center space-x-2 px-8 py-3 bg-black text-white rounded-md hover:bg-gray-200 transition-colors duration-300"
-                  >
-                    <GithubIcon size={24} />
-                    <span>Github</span>
-                  </a>
-                  <button className="flex items-center space-x-2 px-8 py-3 bg-gray-500/70 text-white rounded-md hover:bg-gray-500/90 transition-colors duration-300">
-                    <Info size={24} />
-                    <span>Readme</span>
-                  </button>
+                <div className="w-full flex flex-col gap-4 justify-center items-center">
+                  <p className="text-lg text-gray-700 max-w-xl text-center playwrite">
+                    Stream your favorite movies with SOYO - your personal
+                    streaming service that lets you enjoy your media collection
+                    anywhere in your home.
+                  </p>
+                  <div className="flex md:flex-row flex-col justify-center items-center gap-4 space-x-4 z-[10]">
+                    <a
+                      href="https://github.com/fal3n-4ngel/SOYO"
+                      className="   max-w-fit  flex items-center space-x-2 px-8 py-3 bg-black text-white rounded-md hover:bg-gray-200 transition-colors duration-300"
+                    >
+                      <GithubIcon size={24} />
+                      <span>Github</span>
+                    </a>
+                    <div className="flex space-x-4">
+                      <div className="flex items-center space-x-2 px-4 py-3 bg-gray-100 rounded-md">
+                        <input
+                          type="text"
+                          value={selectedPath}
+                          onChange={(e) => setSelectedPath(e.target.value)}
+                          list="drives"
+                          placeholder="Enter movie directory path"
+                          className="w-full bg-transparent outline-none text-black"
+                        />
+                        <datalist id="drives">
+                          <option value="E:/">E Drive</option>
+                          <option value="F:/">F Drive</option>
+                          <option value="G:/">G Drive</option>
+                        </datalist>
+                      </div>
+                      <button
+                        onClick={handlePathSelection}
+                        className="flex items-center justify-center w-12 h-12 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-colors duration-300"
+                      >
+                        <Folder size={24} />
+                      </button>
+                    </div>
+                  </div>
                 </div>
-              </div>
               </div>
             </div>
           </div>
