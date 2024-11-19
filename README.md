@@ -12,6 +12,10 @@ Styling: Tailwind CSS
 - Displays all video files from the specified local drive.
 - Accessible across devices on the same local network.
 - User-friendly interface for easy navigation and viewing.
+- Fetches anime thumbnails from AniList API to display cover images for videos (if available).
+- Fallback to local thumbnails if no external thumbnail is found.
+- Ability to fetch movie/poster images from IMDb using OMDb API for non-anime videos.
+
 ### Screenshots
 
 
@@ -34,10 +38,15 @@ Install Dependencies:
 npm install
 
 ```
-Create .env.local
-```env
-MOVIE_DIR=F:/
+Create or edit config.json
+```json
+{
+  "movieDir": "F:/",
+  "thumbnailCache": false,
+  "lastAccessedMovie": null
+}
 ```
+
 ## Run the Development Server:
 ```bash
 npm run dev
@@ -61,9 +70,13 @@ http://{ip}:8311   # if Production Server
  to view the website.
 
 ## Troubleshooting
-Create or edit .env.local
-```env
-MOVIE_DIR=F:/ <- your movie directory here
+Create or edit config.json
+```json
+{
+  "movieDir": "F:/",
+  "thumbnailCache": false,
+  "lastAccessedMovie": null
+}
 ```
 
 # Contributors
