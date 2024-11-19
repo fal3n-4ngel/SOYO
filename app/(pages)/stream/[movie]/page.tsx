@@ -1,8 +1,7 @@
-"use client"
-import React, { useState, useEffect } from 'react';
+"use client";
+import React, { useState, useEffect, useCallback } from "react";
 import VideoPlayer from "@/app/components/VideoPlayer";
-import Link from 'next/link';
-
+import Link from "next/link";
 
 interface Movie {
   name: string;
@@ -17,125 +16,123 @@ export default function StreamPage({ params }: { params: { movie: string } }) {
 
   // Load dark mode preference from localStorage
   useEffect(() => {
-    const storedDarkMode = localStorage.getItem('isDarkMode');
+    const storedDarkMode = localStorage.getItem("isDarkMode");
     if (storedDarkMode !== null) {
       setIsDarkMode(JSON.parse(storedDarkMode));
     }
   }, []);
 
+  // Fetch movies and handle recently watched
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 10);
+    const fetchMovies = async () => {
+      try {
+        const response = await fetch("/api/movies");
+        if (!response.ok) throw new Error("Failed to fetch movies");
+        const data = await response.json();
 
-    fetch('/api/movies')
-      .then(response => response.json())
-      .then(data => {
+        // Filter and set "Up Next" movies
         const filteredMovies = data
-          .filter((movie: { name: string; }) => movie.name !== decodedMovie)
+          .filter((movie: Movie) => movie.name !== decodedMovie)
           .slice(0, 5);
         setUpNext(filteredMovies);
-        
-        // Update recently watched in localStorage
-        const recentlyWatched = JSON.parse(localStorage.getItem('recentlyWatched') || '[]');
-        const currentMovie = data.find((m: { name: string; }) => m.name === decodedMovie);
+
+        // Update recently watched
+        const currentMovie = data.find((movie: Movie) => movie.name === decodedMovie);
         if (currentMovie) {
+          const recentlyWatched = JSON.parse(localStorage.getItem("recentlyWatched") || "[]");
           const updatedRecent = [
             currentMovie,
-            ...recentlyWatched.filter((m: Movie) => m.name !== currentMovie.name)
+            ...recentlyWatched.filter((m: Movie) => m.name !== currentMovie.name),
           ].slice(0, 10);
-          localStorage.setItem('recentlyWatched', JSON.stringify(updatedRecent));
+          localStorage.setItem("recentlyWatched", JSON.stringify(updatedRecent));
         }
-      })
-      .catch(error => console.error('Error fetching up next videos:', error));
+      } catch (error) {
+        console.error("Error fetching movies:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-    return () => clearTimeout(timer);
+    fetchMovies();
   }, [decodedMovie]);
 
- 
-
-  const formatTitle = (name: string) => {
+  // Format movie titles
+  const formatTitle = useCallback((name: string) => {
     return name
       .replaceAll("_", " ")
       .replaceAll("@", " ")
       .replaceAll(".", " ")
-      .replaceAll("[MZM]", " ")
-      .replaceAll("mkv", " ")
-      .replaceAll("mp4", " ")
-      .replaceAll("avi", " ")
-      .replaceAll("CV", " ")
+      .replace(/\[MZM\]|mkv|mp4|avi|CV/g, "")
       .trim();
-  };
+  }, []);
 
   if (isLoading) {
     return (
-      <div className={`w-full min-h-screen flex flex-col justify-center items-center ${
-        isDarkMode ? 'bg-[#141414] text-white' : 'bg-white text-black'
-      }`}>
-        <div className="w-24 h-24 border-4 border-current rounded-full animate-spin"></div>
+      <div
+        className={`flex items-center justify-center min-h-screen ${
+          isDarkMode ? "bg-[#141414] text-white" : "bg-white text-black"
+        }`}
+      >
+        <div className="loader w-12 h-12 border-4 border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
   }
 
   return (
-    <div className={`min-h-screen transition-colors duration-300 bg-[#fdfdfd]`}>
-  <nav className={`fixed bg-[#fdfdfd] w-full  z-[50] max-w-screen overflow-x-hidden transition-all duration-300 `}>
-        <div className="flex items-start md:justify-between md:gap-0 gap-4 justify-start px-6 py-4">
-          <div className="flex items-center space-x-8">
-            <a href="/" className={`text-3xl dancing-script font-bold text-black`}>
-              SOYO
-            </a>
-            <div className={`hidden md:flex space-x-6 text-black`}>
-              <Link href="/" className="hover:text-blue-900">Home</Link>
-              <Link href="/#continue" className="hover:text-blue-900">Continue</Link>
-              <Link href="/#explore" className="hover:text-blue-900">Explore</Link>
-           
-            </div>
+    <div className={`min-h-screen transition-colors  bg-white text-black`}>
+      {/* Navbar */}
+      <nav className="fixed bg-white w-full z-50 ">
+        <div className="container mx-auto flex justify-between items-center px-6 py-4">
+          <Link href="/" className="text-3xl font-bold dancing-script text-black">
+            SOYO
+          </Link>
+          <div className="hidden md:flex space-x-6 text-black">
+          <Link
+            href="/"
+            className="group relative inline-block hover:cursor-pointer"
+          >
+            <span className="py-2 text-black">HOME</span>
+            <span className="absolute left-0 top-8 h-[2px] w-0 bg-black transition-all duration-300 group-hover:w-full"></span>
+          </Link>
+          <Link
+            href="/#continue"
+            className="group relative inline-block hover:cursor-pointer"
+          >
+            <span className="py-2 text-black">TRENDING</span>
+            <span className="absolute left-0 top-8 h-[2px] w-0 bg-black transition-all duration-300 group-hover:w-full"></span>
+          </Link>
+          <Link
+            href="/#explore"
+            className="group relative inline-block hover:cursor-pointer"
+          >
+            <span className="py-2 text-black">EXPLORE</span>
+            <span className="absolute left-0 top-8 h-[2px] w-0 bg-black transition-all duration-300 group-hover:w-full"></span>
+          </Link>
           </div>
-
-        
-            
-            
-        
         </div>
       </nav>
 
-      <main className="flex flex-col md:flex-row gap-8 p-6">
-        <div className="w-full md:w-3/4 space-y-4 mt-20">
-          <div className={`rounded-lg overflow-hidden `}>
-            <VideoPlayer movie={params.movie} />
-          </div>
-          
-        
+      {/* Main Content */}
+      <main className="container mx-auto flex flex-col md:flex-row gap-8 px-6 py-20 md:py-[150px] ">
+        {/* Video Player Section */}
+        <div className="w-full md:w-3/4 ">
+          <VideoPlayer movie={params.movie} />
         </div>
 
+        {/* Up Next Section */}
         <aside className="w-full md:w-1/4">
-          <h3 className={`text-lg font-medium mb-4 mt-10 
-            text-black
-          `}>
-            Up Next
-          </h3>
+          <h3 className="text-2xl font-semibold mb-4 quicksand">Up Next</h3>
           <div className="space-y-4">
             {upNext.map((video, index) => (
-              <Link 
-                href={`/stream/${encodeURIComponent(video.name)}`} 
+              <Link
                 key={index}
-                className={`block rounded-lg overflow-hidden transition-all duration-300 `}
+                href={`/stream/${encodeURIComponent(video.name)}`}
+                className="flex gap-4 items-center rounded-lg  p-2 transition-all shadow-sm bg-[#f0f0f0] hover:scale-105 "
               >
-                <div className="flex gap-3 p-2">
-                  <div className="w-40 h-24 rounded-md overflow-hidden flex-shrink-0">
-                    <img 
-                      src={video.thumbnail} 
-                      alt={video.name} 
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <div className="flex-grow min-w-0">
-                    <p className={`font-medium line-clamp-2 text-gray-700`}>
-                      {formatTitle(video.name)}
-                    </p>
-                  </div>
+                <div className="w-24 h-16 flex-shrink-0 rounded-md overflow-hidden">
+                  <img src={video.thumbnail} alt={video.name} className="w-full h-full object-cover" />
                 </div>
+                <p className="font-medium line-clamp-2">{formatTitle(video.name)}</p>
               </Link>
             ))}
           </div>

@@ -250,20 +250,32 @@ export default function MovieList() {
           <div className="flex items-center space-x-8">
             <a
               href="/"
-              className={`text-3xl dancing-script font-bold text-black`}
+              className={`text-4xl dancing-script font-bold text-black`}
             >
               SOYO
             </a>
             <div className={`hidden md:flex space-x-6 text-black`}>
-              <Link href="/" className="hover:text-blue-900">
-                Home
-              </Link>
-              <Link href="/#continue" className="hover:text-blue-900">
-                Continue
-              </Link>
-              <Link href="/#explore" className="hover:text-blue-900">
-                Explore
-              </Link>
+            <Link
+            href="/"
+            className="group relative inline-block hover:cursor-pointer"
+          >
+            <span className="py-2 text-black">HOME</span>
+            <span className="absolute left-0 top-8 h-[2px] w-0 bg-black transition-all duration-300 group-hover:w-full"></span>
+          </Link>
+          <Link
+            href="/#continue"
+            className="group relative inline-block hover:cursor-pointer"
+          >
+            <span className="py-2 text-black">TRENDING</span>
+            <span className="absolute left-0 top-8 h-[2px] w-0 bg-black transition-all duration-300 group-hover:w-full"></span>
+          </Link>
+          <Link
+            href="/#explore"
+            className="group relative inline-block hover:cursor-pointer"
+          >
+            <span className="py-2 text-black">EXPLORE</span>
+            <span className="absolute left-0 top-8 h-[2px] w-0 bg-black transition-all duration-300 group-hover:w-full"></span>
+          </Link>
             </div>
           </div>
 
