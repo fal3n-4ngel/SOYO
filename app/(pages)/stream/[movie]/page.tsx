@@ -117,6 +117,14 @@ export default function StreamPage({ params }: { params: { movie: string } }) {
         {/* Video Player Section */}
         <div className="w-full md:w-3/4 ">
           <VideoPlayer movie={params.movie} />
+          <h2 className="text-lg sm:text-xl font-semibold mt-4 text-gray-800">
+        {decodedMovie
+          .replaceAll("_", " ")
+          .replaceAll("@", " ")
+          .replaceAll(".", " ")
+          .replaceAll("[MZM]", " ")
+          .replace(/\.(mkv|mp4|avi|CV)/g, " ")}
+      </h2>
         </div>
 
         {/* Up Next Section */}

@@ -41,7 +41,7 @@ async function fetchAniListThumbnail(movieName: string) {
   return null;
 }
 
-function cleanMovieName(movieName) {
+function cleanMovieName(movieName: string) {
   // Remove common video file extensions (.mkv, .mp4, .avi, etc.)
   
   let cleanedName = movieName.replace(/\.(mkv|mp4|avi|flv|webm|mov|wmv|_|.|\+|-|-mkv|)$/i, '').trim();

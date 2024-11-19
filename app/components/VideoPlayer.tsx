@@ -18,7 +18,6 @@ export default function EnhancedVideoPlayer({ movie }: { movie: string }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
 
-  const decodedMovie = decodeURIComponent(movie);
 
   const togglePlay = useCallback(() => setPlaying((prev) => !prev), []);
   const toggleMute = useCallback(() => setMuted((prev) => !prev), []);
@@ -207,14 +206,7 @@ export default function EnhancedVideoPlayer({ movie }: { movie: string }) {
         </div>
       </div>
       
-      <h2 className="text-lg sm:text-xl font-semibold mt-4 text-gray-800">
-        {decodedMovie
-          .replaceAll("_", " ")
-          .replaceAll("@", " ")
-          .replaceAll(".", " ")
-          .replaceAll("[MZM]", " ")
-          .replace(/\.(mkv|mp4|avi|CV)/g, " ")}
-      </h2>
+   
     </div>
   );
 }
