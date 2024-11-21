@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Folder, Search, Play, GithubIcon } from "lucide-react";
 
 interface Movie {
+  format: string;
   name: string;
   thumbnail: string;
 }
@@ -114,6 +115,18 @@ export default function MovieList() {
   const [isSearching, setIsSearching] = useState(false);
   const [selectedPath, setSelectedPath] = useState("");
 
+  useEffect(() => {
+    // Check browser support
+    const video = document.createElement("video");
+
+    const supportedMovies = movies.filter((movie) => {
+      const format = movie.format.slice(1); // Remove dot from extension
+      return video.canPlayType(`video/${format}`) !== "";
+    });
+
+    setFilteredMovies(supportedMovies);
+  }, [movies]);
+
   const handlePathSelection = async () => {
     try {
       const response = await fetch("/api/movies", {
@@ -156,7 +169,11 @@ export default function MovieList() {
         setMovies(data);
         setFilteredMovies(data);
         // Simulate recently watched by taking last 5 movies
-        const value = data.slice(-Math.min(Math.floor(Math.random() * 6), 5));
+        let value = data.slice(-Math.min(Math.floor(Math.random() * 6), 5));
+        if(value.length>5){
+          data.slice(5)
+        }
+        console.log("Recently watched:", value.length);
         setRecentlyWatched(value);
       })
       .catch((err) => setError(err.message));

@@ -46,8 +46,8 @@ export function writeConfig(config: Config): void {
  */
 export function getMoviesRecursively(
   dir: string
-): { name: string; thumbnail: string }[] {
-  let results: { name: string; thumbnail: string }[] = [];
+): { name: string; thumbnail: string; format: string }[] {
+  let results: { name: string; thumbnail: string; format: string }[] = [];
 
   const list = fs.readdirSync(dir);
 
@@ -58,17 +58,13 @@ export function getMoviesRecursively(
     if (stat && stat.isDirectory()) {
       results = results.concat(getMoviesRecursively(filePath));
     } else {
-      if (
-        file.endsWith(".mp4") ||
-        file.endsWith(".avi") ||
-        file.endsWith(".ogg")||
-        file.endsWith(".webm")||
-        file.endsWith(".mkv")
-      ) {
+      const extension = path.extname(file).toLowerCase();
+      if ([".mp4", ".avi", ".ogg", ".webm", ".mkv"].includes(extension)) {
         if (file[0] !== "$") {
           results.push({
             name: file,
             thumbnail: `/api/thumbnail/${encodeURIComponent(file)}`,
+            format: extension,
           });
         }
       }
