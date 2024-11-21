@@ -69,15 +69,60 @@ http://{ip}:8311   # if Production Server
 ```
  to view the website.
 
-## Troubleshooting
-Create or edit config.json
-```json
-{
-  "movieDir": "F:/",
-  "thumbnailCache": false,
-  "lastAccessedMovie": null
-}
+
+## Docker Support
+### Prerequisites
++ Docker Desktop installed
++ Sufficient permissions to run Docker
++ Access to local video directories
+
+### Docker Installation
+Install Docker Desktop:
++ Windows/Mac: Download from Docker's official website
++ Linux: Use package manager or official Docker CE installation guides
+
+
+### Build Docker Image
 ```
+docker build -t soyo .
+
+# Build with specific version tag
+docker build -t soyo:v1.0 .
+````
+
+Run Docker Container
+  ```bash
+# Basic run (default F:/ drive)
+docker run -d -p 3000:8311 -v F:/:/media --name soyo soyo:latest
+
+# Custom volume mapping
+docker run -d -p <port>:8311 -v /path/to/your/videos:/media --name soyo soyo:latest
+
+# Run with auto-restart policy
+docker run -d --restart=unless-stopped -p 3000:8311 -v F:/:/media --name soyo soyo:latest
+
+  ```
+### Access the Website: 
+
+  Open your browser and navigate to 
+  ```bash
+  http://{ip}:<port> 
+  ``` 
+
+
+## Troubleshooting
+
+### 1. Volume Mounting Issues
+- Symptoms
+  + Videos not displaying
+  + Incorrect directory access
+  + Permission-related errors
+
+- Troubleshooting Steps
+  ```node
+  # verify the external / needed drives are mounted
+  # restart the wsl ( within docker desktop )
+  ```
 
 # Contributors
 
@@ -95,3 +140,6 @@ Create or edit config.json
 
 ## License
 This project is open-source and available under the MIT License.
+
+
+Interested in improving Soyo? I welcome contributions! Feel free to open issues, submit pull requests, or share your ideas on GitHub. Together, we can make this project even better. 🌟
