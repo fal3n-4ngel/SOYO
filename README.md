@@ -22,7 +22,7 @@ Styling: Tailwind CSS
 <img src="https://github.com/user-attachments/assets/8784693b-1431-46cd-8b0e-d98147396aa4" alt="Laptop view" width="400"/>
 <img src="https://github.com/user-attachments/assets/1d6fa291-4c01-4f1c-969a-7ad48e23afd7" alt="Mobile view" width="400" />
 <img src="https://github.com/user-attachments/assets/834900fc-00ad-43fb-9892-fa55fc1d6e6e" alt="Mobile view" width="400" />
-<img src="https://github.com/user-attachments/assets/295fdda8-6a8b-4a76-b819-a387ca6beb20" alt="Laptop view" width="400"/>
+<img src="https://github.com/user-attachments/assets/2c9a0ad8-aa4e-4063-a0a8-7f14f5a3d727" alt="Laptop view" width="400"/>
 
   
 ## Instructions to Run the Project
