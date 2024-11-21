@@ -42,30 +42,16 @@ async function fetchAniListThumbnail(movieName: string) {
 }
 
 function cleanMovieName(movieName: string) {
-  // Remove common video file extensions (.mkv, .mp4, .avi, etc.)
-  
   let cleanedName = movieName.replace(/\.(mkv|mp4|avi|flv|webm|mov|wmv|_|.|\+|-|-mkv|)$/i, '').trim();
-  
-  // Remove resolution details (720p, 1080p, etc.)
   cleanedName = cleanedName.replace(/\b(720p|1080p|480p|HEVC|4K|HD|SD|BluRay|BRRip|HDRip)\b/g, '').trim();
-  
-  // Remove language, format, codec, and other unnecessary details
   cleanedName = cleanedName.replace(/\b(Hindi|English|Tamil|Telugu|ESub|AAC|x264|x265|HEVC|WEB-DL|BluRay|Org|VCD|YIFY|YTS|AMZN|BiGiL)\b/g, '').trim();
-
-  // Remove square brackets or anything inside them, including any special characters
   cleanedName = cleanedName.replace(/\[.*?\]/g, '').trim();
-  
-  // Remove underscores and other unwanted characters
   cleanedName = cleanedName.replace(/_/g, ' ').trim();
-  
-  // Remove extra spaces
   cleanedName = cleanedName.replace(/\s+/g, ' ').trim();
-
-  // Remove years (e.g., 2001, 1997, etc.)
   cleanedName = cleanedName.replace(/\b\d{4}\b/g, '').trim();
-
   return cleanedName;
 }
+
 // Fetch IMDb Thumbnail (returns URL of the image)
 async function fetchIMDbThumbnail(movieName: string) {
   const apiKey = process.env.IMDB_API_KEY; // Use your OMDb API key here
@@ -85,16 +71,35 @@ async function fetchIMDbThumbnail(movieName: string) {
   return null;
 }
 
+function saveThumbnailToFile(thumbnailUrl: string, movieName: string) {
+  const movieDir = getMovieDir();
+  const thumbnailPath = path.join(movieDir, 'thumbnails', `${movieName}.jpg`);
+
+  return axios({
+    url: thumbnailUrl,
+    method: 'GET',
+    responseType: 'stream',
+  }).then(response => {
+    return new Promise((resolve, reject) => {
+      const writer = fs.createWriteStream(thumbnailPath);
+      response.data.pipe(writer);
+
+      writer.on('finish', () => resolve(thumbnailPath));
+      writer.on('error', reject);
+    });
+  }).catch(err => {
+    console.error("Error saving thumbnail:", err);
+  });
+}
+
 export async function GET(request: NextRequest, { params }: { params: { movie: string } }) {
   const movieDir = getMovieDir();
   const { movie } = params;
   const movieNameWithoutExtension = movie.split(".").slice(0, -1).join(".");
-
-  // Check if the local thumbnail exists
   const thumbnailPath = path.join(movieDir, 'thumbnails', `${movieNameWithoutExtension}.jpg`);
   const defaultThumbnailPath = path.join(process.cwd(), 'public', 'default.jpg');
 
-  // If the local thumbnail exists, serve it
+  // Check if the local thumbnail exists
   if (fs.existsSync(thumbnailPath)) {
     const thumbnailStat = fs.statSync(thumbnailPath);
     const thumbnailFileSize = thumbnailStat.size;
@@ -129,35 +134,20 @@ export async function GET(request: NextRequest, { params }: { params: { movie: s
     }
   }
 
-  // If no local thumbnail, try fetching external thumbnails (AniList or IMDb)
+  // Fetch external thumbnails if not found locally
   let externalThumbnailUrl = await fetchIMDbThumbnail(movieNameWithoutExtension);
-
   if (!externalThumbnailUrl) {
-    // If AniList thumbnail is not available, fetch IMDb thumbnail
     externalThumbnailUrl = await fetchAniListThumbnail(movieNameWithoutExtension);
   }
 
-  // If no external thumbnail is found, use the default thumbnail
   const finalThumbnailUrl = externalThumbnailUrl || defaultThumbnailPath;
 
-  // If external thumbnail URL was found, fetch the image and return it
+  // Cache the thumbnail if an external URL was fetched
   if (externalThumbnailUrl) {
-    try {
-      const response = await axios.get(externalThumbnailUrl, { responseType: 'stream' });
-      const headers = {
-        "Content-Type": response.headers['content-type'],
-        "Content-Length": response.headers['content-length'],
-      };
-      return new NextResponse(Readable.toWeb(response.data) as ReadableStream, {
-        status: 200,
-        headers: headers,
-      });
-    } catch (error) {
-      console.error("Error fetching image from external URL:", error);
-    }
+    await saveThumbnailToFile(externalThumbnailUrl, movieNameWithoutExtension);
   }
 
-  // If no external image, fall back to the default thumbnail
+  // Serve the thumbnail
   const thumbnailFile = fs.existsSync(finalThumbnailUrl) ? finalThumbnailUrl : defaultThumbnailPath;
   const thumbnailStat = fs.statSync(thumbnailFile);
   const thumbnailFileSize = thumbnailStat.size;

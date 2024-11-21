@@ -61,6 +61,8 @@ export function getMoviesRecursively(
       if (
         file.endsWith(".mp4") ||
         file.endsWith(".avi") ||
+        file.endsWith(".ogg")||
+        file.endsWith(".webm")||
         file.endsWith(".mkv")
       ) {
         if (file[0] !== "$") {

@@ -1,7 +1,17 @@
 "use client";
-import React, { useState, useRef, useCallback, useEffect } from 'react';
-import ReactPlayer from 'react-player';
-import { Play, Pause, Volume2, VolumeX, Maximize, Minimize, SkipBack, SkipForward, RotateCcw } from 'lucide-react';
+import React, { useState, useRef, useCallback, useEffect } from "react";
+import ReactPlayer from "react-player";
+import {
+  Play,
+  Pause,
+  Volume2,
+  VolumeX,
+  Maximize,
+  Minimize,
+  SkipBack,
+  SkipForward,
+  RotateCcw,
+} from "lucide-react";
 
 export default function EnhancedVideoPlayer({ movie }: { movie: string }) {
   const [playing, setPlaying] = useState(false);
@@ -18,13 +28,15 @@ export default function EnhancedVideoPlayer({ movie }: { movie: string }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
 
-
   const togglePlay = useCallback(() => setPlaying((prev) => !prev), []);
   const toggleMute = useCallback(() => setMuted((prev) => !prev), []);
-  const handleVolumeChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setVolume(parseFloat(e.target.value));
-    setMuted(false);
-  }, []);
+  const handleVolumeChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setVolume(parseFloat(e.target.value));
+      setMuted(false);
+    },
+    []
+  );
 
   const toggleFullscreen = useCallback(() => {
     if (!document.fullscreenElement) {
@@ -44,11 +56,14 @@ export default function EnhancedVideoPlayer({ movie }: { movie: string }) {
     setDuration(duration);
   }, []);
 
-  const handleSeekChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const time = parseFloat(e.target.value);
-    setProgress(time);
-    playerRef.current?.seekTo(time);
-  }, []);
+  const handleSeekChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const time = parseFloat(e.target.value);
+      setProgress(time);
+      playerRef.current?.seekTo(time);
+    },
+    []
+  );
 
   const handleSkip = useCallback((seconds: number) => {
     const currentTime = playerRef.current?.getCurrentTime() || 0;
@@ -62,21 +77,27 @@ export default function EnhancedVideoPlayer({ movie }: { movie: string }) {
 
   const handleError = useCallback((e: Error) => {
     console.error("Error loading video:", e);
-    setError("Error loading video. Please try again later.");
+    if (e.message.includes("Unsupported format")) {
+      setError(
+        "This video format is not supported. Please try a different file."
+      );
+    } else {
+      setError("Error loading video. Please try again later.");
+    }
   }, []);
 
   const formatTime = useCallback((time: number) => {
-    if (!isFinite(time)) return '0:00';
+    if (!isFinite(time)) return "0:00";
     const minutes = Math.floor(time / 60);
     const seconds = Math.floor(time % 60);
-    return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+    return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
   }, []);
 
   useEffect(() => {
     const checkMobile = () => {
       const isMobileView = window.innerWidth < 768;
       setIsMobile(isMobileView);
-      
+
       // Adjust container size based on screen
       if (containerRef.current && wrapperRef.current) {
         if (fullscreen) {
@@ -87,10 +108,10 @@ export default function EnhancedVideoPlayer({ movie }: { movie: string }) {
         }
       }
     };
-    
+
     checkMobile();
-    window.addEventListener('resize', checkMobile);
-    
+    window.addEventListener("resize", checkMobile);
+
     // Handle fullscreen changes
     const handleFullscreenChange = () => {
       if (!document.fullscreenElement) {
@@ -98,32 +119,42 @@ export default function EnhancedVideoPlayer({ movie }: { movie: string }) {
         checkMobile();
       }
     };
-    
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
-    
+
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+
     return () => {
-      window.removeEventListener('resize', checkMobile);
-      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      window.removeEventListener("resize", checkMobile);
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
     };
   }, [fullscreen]);
 
   return (
-    <div 
+    <div
       className={`flex flex-col w-full max-w-[1600px] mx-auto px-4 ${
-        fullscreen ? 'h-screen' : ''
+        fullscreen ? "h-screen" : ""
       }`}
       ref={containerRef}
     >
-      <div 
+      <div
         ref={wrapperRef}
         className={`relative w-full rounded-xl overflow-hidden bg-black ${
-          fullscreen ? 'h-screen' : ''
+          fullscreen ? "h-screen" : ""
         }`}
-        style={{ paddingTop: fullscreen ? '0' : videoHeight }}
+        style={{ paddingTop: fullscreen ? "0" : videoHeight }}
       >
         {error ? (
-          <div className="absolute inset-0 flex items-center justify-center text-white">
-            {error}
+          <div className="absolute inset-0 flex flex-col items-center justify-center text-white bg-black/75">
+            <p className="text-lg font-semibold mb-2">{error}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="px-4 py-2 text-sm font-medium text-black bg-white rounded hover:bg-gray-200"
+            >
+              Reload Video
+            </button>
+            <p className="text-sm mt-2">
+              If the issue persists, check the file format or try downloading
+              it.
+            </p>
           </div>
         ) : (
           <ReactPlayer
@@ -137,10 +168,8 @@ export default function EnhancedVideoPlayer({ movie }: { movie: string }) {
             onError={handleError}
             onProgress={handleProgress}
             onDuration={handleDuration}
-            className={`absolute top-0 left-0 ${
-              fullscreen ? 'h-full' : ''
-            }`}
-            style={{ position: 'absolute', top: 0, left: 0 }}
+            className={`absolute top-0 left-0 ${fullscreen ? "h-full" : ""}`}
+            style={{ position: "absolute", top: 0, left: 0 }}
             fallback={
               <div className="absolute inset-0 flex items-center justify-center text-white">
                 Loading...
@@ -148,7 +177,7 @@ export default function EnhancedVideoPlayer({ movie }: { movie: string }) {
             }
           />
         )}
-        
+
         {/* Controls Overlay */}
         <div className="absolute bottom-0 left-0 right-0 p-2 sm:p-4 bg-gradient-to-t from-black to-transparent">
           <input
@@ -162,16 +191,28 @@ export default function EnhancedVideoPlayer({ movie }: { movie: string }) {
           />
           <div className="flex flex-row items-center justify-between text-white">
             <div className="flex items-center space-x-1 sm:space-x-2">
-              <button onClick={togglePlay} className="p-1 sm:p-2 hover:bg-white/20 rounded-full transition">
+              <button
+                onClick={togglePlay}
+                className="p-1 sm:p-2 hover:bg-white/20 rounded-full transition"
+              >
                 {playing ? <Pause size={20} /> : <Play size={20} />}
               </button>
-              <button onClick={() => handleSkip(-10)} className="p-1 sm:p-2 hover:bg-white/20 rounded-full transition">
+              <button
+                onClick={() => handleSkip(-10)}
+                className="p-1 sm:p-2 hover:bg-white/20 rounded-full transition"
+              >
                 <SkipBack size={20} />
               </button>
-              <button onClick={() => handleSkip(10)} className="p-1 sm:p-2 hover:bg-white/20 rounded-full transition">
+              <button
+                onClick={() => handleSkip(10)}
+                className="p-1 sm:p-2 hover:bg-white/20 rounded-full transition"
+              >
                 <SkipForward size={20} />
               </button>
-              <button onClick={handleRestart} className="p-1 sm:p-2 hover:bg-white/20 rounded-full transition">
+              <button
+                onClick={handleRestart}
+                className="p-1 sm:p-2 hover:bg-white/20 rounded-full transition"
+              >
                 <RotateCcw size={20} />
               </button>
               <span className="text-xs sm:text-sm">
@@ -180,8 +221,8 @@ export default function EnhancedVideoPlayer({ movie }: { movie: string }) {
             </div>
             <div className="flex items-center space-x-1 sm:space-x-2">
               <div className="flex items-center">
-                <button 
-                  onClick={toggleMute} 
+                <button
+                  onClick={toggleMute}
                   className="p-1 sm:p-2 hover:bg-white/20 rounded-full transition"
                 >
                   {muted ? <VolumeX size={20} /> : <Volume2 size={20} />}
@@ -198,15 +239,16 @@ export default function EnhancedVideoPlayer({ movie }: { movie: string }) {
                   />
                 )}
               </div>
-              <button onClick={toggleFullscreen} className="p-1 sm:p-2 hover:bg-white/20 rounded-full transition">
+              <button
+                onClick={toggleFullscreen}
+                className="p-1 sm:p-2 hover:bg-white/20 rounded-full transition"
+              >
                 {fullscreen ? <Minimize size={20} /> : <Maximize size={20} />}
               </button>
             </div>
           </div>
         </div>
       </div>
-      
-   
     </div>
   );
 }
