@@ -169,7 +169,7 @@ export default function MovieList() {
         setMovies(data);
         setFilteredMovies(data);
         // Simulate recently watched by taking last 5 movies
-        let value = data.slice(-Math.min(Math.floor(Math.random() * 6), 5));
+        const value = data.slice(-Math.min(Math.floor(Math.random() * 6), 5));
         if(value.length>5){
           data.slice(5)
         }
@@ -210,9 +210,9 @@ export default function MovieList() {
               <p className="text-5xl text-red-400 max-w-xl text-center quicksand ">
                 Failed to fetch movies
               </p>
-              <p className="text-xl text-black py-2">
+              <p className="text-xl text-black py-2 text-center">
                 Please verify the file location specified in{" "}
-                <code className="code-highlight">.env.local</code>.
+                <code className="code-highlight">config.json</code>. <br/> or update below
               </p>
               <div className="flex md:flex-row flex-col space-x-4">
                 <a
