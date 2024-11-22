@@ -71,6 +71,13 @@ http://{ip}:8311   # if Production Server
 
 
 ## Docker Support
+
+### DockerHub Image
+
+```bash
+docker pull fal3n4ngel/soyo
+```
+
 ### Prerequisites
 + Docker Desktop installed
 + Sufficient permissions to run Docker
