@@ -19,58 +19,14 @@ Styling: Tailwind CSS
 ### Screenshots
 
 
-<img src="https://github.com/user-attachments/assets/8784693b-1431-46cd-8b0e-d98147396aa4" alt="Laptop view" width="400"/>
-<img src="https://github.com/user-attachments/assets/1d6fa291-4c01-4f1c-969a-7ad48e23afd7" alt="Mobile view" width="400" />
-<img src="https://github.com/user-attachments/assets/834900fc-00ad-43fb-9892-fa55fc1d6e6e" alt="Mobile view" width="400" />
-<img src="https://github.com/user-attachments/assets/2c9a0ad8-aa4e-4063-a0a8-7f14f5a3d727" alt="Laptop view" width="400"/>
+  <img src="https://github.com/user-attachments/assets/8784693b-1431-46cd-8b0e-d98147396aa4" alt="Laptop view" width="400"/>
+  <img src="https://github.com/user-attachments/assets/1d6fa291-4c01-4f1c-969a-7ad48e23afd7" alt="Mobile view" width="400" />
+  <img src="https://github.com/user-attachments/assets/834900fc-00ad-43fb-9892-fa55fc1d6e6e" alt="Mobile view" width="400" />
+  <img src="https://github.com/user-attachments/assets/2c9a0ad8-aa4e-4063-a0a8-7f14f5a3d727" alt="Laptop view" width="400"/>
 
   
-## Instructions to Run the Project
-Clone the Repository:
-```bash
 
-git clone https://github.com/fal3n-4ngel/soyo.git
-cd soyo
-```
-Install Dependencies:
-```bash
-
-npm install
-
-```
-Create or edit config.json
-```json
-{
-  "movieDir": "F:/",
-  "thumbnailCache": false,
-  "lastAccessedMovie": null
-}
-```
-
-## Run the Development Server:
-```bash
-npm run dev
-```
-
-## Run the Production Server:
-```bash
-npm run build
-npm run start
-```
-
-## Access the Website: 
-
-Open your browser and navigate to 
-```bash
-http://{ip}:3000   # if Development Server
-``` 
-```bash 
-http://{ip}:8311   # if Production Server
-```
- to view the website.
-
-
-## Docker Support
+## Run using Docker
 
 ### DockerHub Image
 
@@ -120,7 +76,55 @@ docker run -d --restart=unless-stopped -p <port>:8311 --volume=F:\:/Movies --vol
   Open your browser and navigate to 
   ```bash
   http://{ip}:<port> 
-  ``` 
+  ```
+
+
+## Run Using Node.js
+Clone the Repository:
+```bash
+
+git clone https://github.com/fal3n-4ngel/soyo.git
+cd soyo
+```
+Install Dependencies:
+```bash
+
+npm install
+
+```
+Create or edit config.json
+```json
+{
+  "movieDir": "F:/",
+  "thumbnailCache": false,
+  "lastAccessedMovie": null
+}
+```
+
+## Run the Development Server:
+```bash
+npm run dev
+```
+
+## Run the Production Server:
+```bash
+npm run build
+npm run start
+```
+
+## Access the Website: 
+
+Open your browser and navigate to 
+```bash
+http://{ip}:3000   # if Development Server
+``` 
+```bash 
+http://{ip}:8311   # if Production Server
+```
+ to view the website.
+
+
+
 
 
 ## Troubleshooting
