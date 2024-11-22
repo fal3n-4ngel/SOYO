@@ -80,19 +80,20 @@ docker run -d --restart=unless-stopped -p <port>:8311 --volume=F:\:/Movies --vol
 
 
 ## Run Using Node.js
-Clone the Repository:
+
+### Clone the Repository:
 ```bash
 
 git clone https://github.com/fal3n-4ngel/soyo.git
 cd soyo
 ```
-Install Dependencies:
+### Install Dependencies:
 ```bash
 
 npm install
 
 ```
-Create or edit config.json
+### Create or edit config.json
 ```json
 {
   "movieDir": "F:/",
@@ -101,18 +102,18 @@ Create or edit config.json
 }
 ```
 
-## Run the Development Server:
+### Run the Development Server:
 ```bash
 npm run dev
 ```
 
-## Run the Production Server:
+### Run the Production Server:
 ```bash
 npm run build
 npm run start
 ```
 
-## Access the Website: 
+### Access the Website: 
 
 Open your browser and navigate to 
 ```bash
