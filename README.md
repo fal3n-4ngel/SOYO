@@ -92,14 +92,11 @@ docker build -t soyo:v1.0 .
 
 Run Docker Container
   ```bash
-# Basic run (default F:/ drive)
-docker run -d -p 3000:8311 -v F:/:/media --name soyo soyo:latest
-
-# Custom volume mapping
-docker run -d -p <port>:8311 -v /path/to/your/videos:/media --name soyo soyo:latest
+# Basic run 
+docker run -d -p <port>:8311 --volume=F:\:/Movies --volume=G:\:/Anime --name soyo soyo:latest
 
 # Run with auto-restart policy
-docker run -d --restart=unless-stopped -p 3000:8311 -v F:/:/media --name soyo soyo:latest
+docker run -d --restart=unless-stopped -p <port>:8311 --volume=F:\:/Movies --volume=G:\:/Anime --name soyo soyo:latest
 
   ```
 ### Access the Website: 
