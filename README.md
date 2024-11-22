@@ -78,32 +78,41 @@ http://{ip}:8311   # if Production Server
 docker pull fal3n4ngel/soyo
 ```
 
-### Prerequisites
-+ Docker Desktop installed
-+ Sufficient permissions to run Docker
-+ Access to local video directories
+ <h3>Prerequisites</h3>
 
-### Docker Installation
-Install Docker Desktop:
-+ Windows/Mac: Download from Docker's official website
-+ Linux: Use package manager or official Docker CE installation guides
+  <ul>
+    <li>Docker Desktop installed</li>
+    <li>Sufficient permissions to run Docker</li>
+    <li>Access to local video directories</li>
+  </ul>
 
+<details>
+  <summary><strong>Custom Building</strong></summary>
 
-### Build Docker Image
-```
-docker build -t soyo .
+<p><strong>Install Docker Desktop:</strong></p>
+<ul>
+  <li><strong>Windows/Mac:</strong> Download from Docker's official website</li>
+  <li><strong>Linux:</strong> Use package manager or follow the official Docker CE installation guides</li>
+</ul>
 
-# Build with specific version tag
-docker build -t soyo:v1.0 .
-````
+<p><strong>Build Docker Image</strong></p>
+<pre>
+<code>
+docker build -t soyo .  
+docker build -t soyo:v1.0 . # build with specific tag
+</code>
+</pre>
+
+</details>
+
 
 Run Docker Container
   ```bash
 # Basic run 
-docker run -d -p <port>:8311 --volume=F:\:/Movies --volume=G:\:/Anime --name soyo soyo:latest
+docker run -d -p <port>:8311 --volume=F:/:/Movies --volume=G:/:/Anime --name soyo fal3n4ngel/soyo:latest
 
 # Run with auto-restart policy
-docker run -d --restart=unless-stopped -p <port>:8311 --volume=F:\:/Movies --volume=G:\:/Anime --name soyo soyo:latest
+docker run -d --restart=unless-stopped -p <port>:8311 --volume=F:\:/Movies --volume=G:\:/Anime --name soyo fal3n4ngel/soyo:latest
 
   ```
 ### Access the Website: 
