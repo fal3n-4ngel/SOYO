@@ -1,6 +1,29 @@
-# Soyo - Stream On Your Own
-## What is Soyo?
-Soyo is a Next.js website designed to display video files stored on a local drive (default: F:/). The website is accessible throughout the local network, providing a convenient way to browse and view videos without needing a central server.<br/>Wanted to watch animes on phone but low on storage , so proceeded to spend hours in this
+
+   
+<h1 align="center"> SOYO - Stream On Your Own </h1> 
+<h1 align="center">
+
+  <br>
+  <div>
+    <a href="https://github.com/fal3n-4ngel/soyo/issues">
+        <img src="https://img.shields.io/github/issues/fal3n-4ngel/soyo?color=fab387&labelColor=303446&style=for-the-badge">
+    </a>
+    <a href="https://github.com/fal3n-4ngel/soyo/stargazers">
+        <img src="https://img.shields.io/github/stars/fal3n-4ngel/soyo?color=ca9ee6&labelColor=303446&style=for-the-badge">
+    </a>
+    <a href="https://github.com/fal3n-4ngel/soyo">
+        <img src="https://img.shields.io/github/repo-size/fal3n-4ngel/soyo?color=ea999c&labelColor=303446&style=for-the-badge">
+    </a>
+    <a href="https://github.com/fal3n-4ngel/soyo/LICENSE">
+        <img src="https://img.shields.io/static/v1.svg?style=for-the-badge&label=License&message=MIT&logoColor=ca9ee6&colorA=313244&colorB=cba6f7"/>
+    </a>
+    <br>
+    </div>
+
+   </h1>
+
+## What is SOYO?
+SOYO is a Next.js website designed to display video files stored on a local drive (default: F:/). The website is accessible throughout the local network, providing a convenient way to browse and view videos without needing a central server.<br/>Wanted to watch animes on phone but low on storage , so proceeded to spend hours in this
 
 ## Technical Details
 ```
