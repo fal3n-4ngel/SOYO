@@ -6,7 +6,17 @@
 .pnp.js
 .yarn/install-state.gz
 
+# legacy & local configs
 /config.json
+
+# soyo user data — settings, watch history, generated artwork & uploaded avatars
+/db.json
+/db.json.*
+*.tmp
+/.soyo-thumbs/*
+/.soyo-torrents/*
+/public/avatars/*
+!/public/avatars/.gitkeep
 
 # testing
 /coverage
@@ -21,6 +31,8 @@
 # misc
 .DS_Store
 *.pem
+.idea/
+.vscode/
 
 # debug
 npm-debug.log*
@@ -36,5 +48,3 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
-config.json
-config.json
