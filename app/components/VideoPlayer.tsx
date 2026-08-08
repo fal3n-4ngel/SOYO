@@ -36,6 +36,7 @@ export interface MediaInfo {
   size: number;
   delivery: "direct" | "remux" | "transcode";
   seekable: boolean;
+  streamUrl?: string;
   probe: { duration: number; width: number; height: number; videoCodec: string } | null;
   subtitles: SubtitleTrack[];
   progress: { time: number; duration: number; completed: boolean } | null;
@@ -96,10 +97,11 @@ export default function VideoPlayer({
 
   const src = useCallback(
     (startAt: number) => {
-      const base = `/api/stream/${encodeURIComponent(movie)}`;
-      return startAt > 0 && !seekable ? `${base}?t=${Math.floor(startAt)}` : base;
+      const base = info?.streamUrl || `/api/stream/${encodeURIComponent(movie)}`;
+      const separator = base.includes("?") ? "&" : "?";
+      return startAt > 0 && !seekable ? `${base}${separator}t=${Math.floor(startAt)}` : base;
     },
-    [movie, seekable]
+    [movie, seekable, info?.streamUrl]
   );
 
   const showControls = useCallback(() => {

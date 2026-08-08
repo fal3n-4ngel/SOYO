@@ -51,11 +51,11 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    const contentType = file.name.endsWith(".mkv")
-      ? "video/x-matroska"
-      : file.name.endsWith(".webm")
-      ? "video/webm"
-      : "video/mp4";
+    let contentType = "video/mp4";
+    const nameLower = file.name.toLowerCase();
+    if (nameLower.endsWith(".webm")) contentType = "video/webm";
+    else if (nameLower.endsWith(".ogg") || nameLower.endsWith(".ogv")) contentType = "video/ogg";
+    else if (nameLower.endsWith(".mkv")) contentType = "video/mp4"; // Serve MP4/H.264 stream container for MKV in HTML5 video
 
     return new NextResponse(webStream, {
       status: range ? 206 : 200,

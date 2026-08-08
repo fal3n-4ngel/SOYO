@@ -33,6 +33,7 @@ export default function StreamPage({ params }: { params: Promise<{ movie: string
     if (torrentUrl) {
       setInfo({
         name,
+        streamUrl: torrentUrl,
         folder: "Torrent",
         format: ".mp4",
         size: 0,
