@@ -13,12 +13,38 @@ const jbMono = JetBrains_Mono({
 const outfit = Outfit({ subsets: ["latin"], variable: "--font-outfit", display: "swap" });
 
 export const metadata: Metadata = {
-  title: "SOYO — Stream On Your Own",
+  title: {
+    default: "SOYO — Stream On Your Own",
+    template: "%s | SOYO",
+  },
   description:
-    "Stream your local media library to any device on your Wi-Fi. No cloud, no account, no upload.",
-  applicationName: "Soyo",
-  appleWebApp: { capable: true, title: "Soyo", statusBarStyle: "black-translucent" },
+    "Stream your local media library to any device on your Wi-Fi. No cloud, no account, no upload. Privacy-first, ultrafast local media server.",
+  applicationName: "SOYO",
+  keywords: ["SOYO", "media server", "local streaming", "home streaming", "privacy-first media server", "self-hosted", "Next.js media server"],
+  authors: [{ name: "fal3n-4ngel", url: "https://github.com/fal3n-4ngel" }],
+  creator: "fal3n-4ngel",
+  publisher: "SOYO",
+  metadataBase: new URL("https://github.com/fal3n-4ngel/SOYO"),
+  openGraph: {
+    title: "SOYO — Stream On Your Own",
+    description: "Stream your local media library to any device on your Wi-Fi. No cloud, no account, no upload.",
+    url: "https://github.com/fal3n-4ngel/SOYO",
+    siteName: "SOYO",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "SOYO — Stream On Your Own",
+    description: "Stream your local media library to any device on your Wi-Fi. No cloud, no account, no upload.",
+  },
+  appleWebApp: { capable: true, title: "SOYO", statusBarStyle: "black-translucent" },
   formatDetection: { telephone: false },
+  icons: {
+    icon: [
+      { url: "/favicon.ico" },
+      { url: "/icon.svg", type: "image/svg+xml" },
+    ],
+  },
 };
 
 export const viewport: Viewport = {

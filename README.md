@@ -1,203 +1,104 @@
-# Soyo - Stream On Your Own
-## What is Soyo?
-Soyo is a Next.js website designed to display video files stored on a local drive (default: F:/). The website is accessible throughout the local network, providing a convenient way to browse and view videos without needing a central server.<br/>Wanted to watch animes on phone but low on storage , so proceeded to spend hours in this
+# SOYO — Stream On Your Own
 
-## Technical Details
-```
-Framework: Next.js
-Styling: Tailwind CSS
-```
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![GitHub](https://img.shields.io/badge/GitHub-fal3n--4ngel%2FSOYO-181717?logo=github)](https://github.com/fal3n-4ngel/SOYO)
 
-## Features
-- Displays all video files from the specified local drive.
-- Accessible across devices on the same local network.
-- User-friendly interface for easy navigation and viewing.
-- Fetches anime thumbnails from AniList API to display cover images for videos (if available).
-- Fallback to local thumbnails if no external thumbnail is found.
-- Ability to fetch movie/poster images from IMDb using OMDb API for non-anime videos.
+Soyo is a privacy-first, zero-cloud media server built with Next.js. It streams your local media library (movies, series, anime) to any device on your home Wi-Fi network without requiring cloud uploads, user accounts, or external tracking.
+
+---
+
+## ⚡ Recent Updates & Features
+
+- **🎨 Telescope-Inspired Design & Physics**: Featuring a modern Scandinavian minimalist design with GPU-accelerated 3D parallax floating collages (`translate3d`) and fluid sine-wave physics.
+- **⚡ Ultrafast Video Streaming & Seeking Engine**:
+  - Instant playback start (`-analyzeduration 1000000 -probesize 1000000`).
+  - Monotonic timestamp reconstruction (`-avoid_negative_ts make_zero`) eliminating playback freezes on seek.
+  - Automatic delivery selection: Direct byte streaming, remuxing (`-c copy`), or quality-tuned H.264 transcoding.
+- **💬 Embedded Subtitle Extraction & Memory Caching**:
+  - Automatically lists sidecars (`.vtt`, `.srt`, `.ass`) and embedded text tracks.
+  - In-memory VTT caching (`vttCache`) for instantaneous subtitle loading.
+- **🌐 Network Discovery & QR Panel**:
+  - Automatic mDNS broadcasting (`http://soyo.local:3000`).
+  - One-click copy for universal LAN IP addresses and permanent QR code scanning for phones.
+- **⚙️ Config Dashboard (`/config`)**:
+  - Manage network interfaces, library scan paths, transcode qualities, and PIN lock protection.
+
+---
 
 ### Screenshots
 
-
+<div align="center">
   <img src="https://github.com/user-attachments/assets/8784693b-1431-46cd-8b0e-d98147396aa4" alt="Laptop view" width="400"/>
   <img src="https://github.com/user-attachments/assets/1d6fa291-4c01-4f1c-969a-7ad48e23afd7" alt="Mobile view" width="400" />
-  <img src="https://github.com/user-attachments/assets/834900fc-00ad-43fb-9892-fa55fc1d6e6e" alt="Mobile view" width="400" />
-  <img src="https://github.com/user-attachments/assets/2c9a0ad8-aa4e-4063-a0a8-7f14f5a3d727" alt="Laptop view" width="400"/>
+</div>
 
-  
+---
 
-## Run using Docker
+## 🚀 Quick Start (Node.js)
 
-### DockerHub Image
-
+### 1. Clone the Repository
 ```bash
-docker pull fal3n4ngel/soyo
+git clone https://github.com/fal3n-4ngel/SOYO.git
+cd SOYO
 ```
 
- <h3>Prerequisites</h3>
-
-  <ul>
-    <li>Docker Desktop installed</li>
-    <li>Sufficient permissions to run Docker</li>
-    <li>Access to local video directories</li>
-  </ul>
-
-<details>
-  <summary><strong>Custom Building</strong></summary>
-
-<p><strong>Install Docker Desktop:</strong></p>
-<ul>
-  <li><strong>Windows/Mac:</strong> Download from Docker's official website</li>
-  <li><strong>Linux:</strong> Use package manager or follow the official Docker CE installation guides</li>
-</ul>
-
-<p><strong>Build Docker Image</strong></p>
-<pre>
-<code>
-docker build -t soyo .  
-docker build -t soyo:v1.0 . # build with specific tag
-</code>
-</pre>
-
-</details>
-
-
-Run Docker Container
-  ```bash
-# Basic run 
-docker run -d -p 3000:3000 --volume=F:/:/Movies --volume=G:/:/Anime --name soyo fal3n4ngel/soyo:latest
-
-# Run with auto-restart policy
-docker run -d --restart=unless-stopped -p 3000:3000 --volume=F:\:/Movies --volume=G:\:/Anime --name soyo fal3n4ngel/soyo:latest
-
-  ```
-
-> Use `--network=host` instead of `-p` if you want `soyo.local` discovery to work
-> from other devices — mDNS cannot cross Docker's bridge network.
-
-Then open **Settings → Library** in the app and add `/Movies` and `/Anime` as
-media folders.
-### Access the Website: 
-
-  Open your browser and navigate to 
-  ```bash
-  http://{ip}:<port> 
-  ```
-
-
-## Run Using Node.js
-
-### Clone the Repository:
+### 2. Install Dependencies
 ```bash
-
-git clone https://github.com/fal3n-4ngel/soyo.git
-cd soyo
-```
-### Install Dependencies:
-```bash
-
 npm install
-
 ```
-### Install ffmpeg
 
-Thumbnails, subtitle extraction and playback of non-MP4 files all need `ffmpeg`
-and `ffprobe` on your `PATH`.
-
+### 3. Install FFmpeg
+Playback of non-browser formats (MKV, HEVC, AC3) and subtitle extraction require `ffmpeg` and `ffprobe`:
 ```bash
 winget install Gyan.FFmpeg      # Windows
 brew install ffmpeg             # macOS
-sudo apt install ffmpeg         # Debian/Ubuntu
+sudo apt install ffmpeg         # Linux
 ```
 
-### Run the Development Server:
+### 4. Run Development Server
 ```bash
 npm run dev
 ```
 
-### Run the Production Server:
-```bash
-npm run build
-npm run start
-```
+Open `http://localhost:3000` or `http://soyo.local:3000`.
 
-Both bind to `0.0.0.0:3000`, so the server is reachable from every device on
-your network. On startup it prints the exact addresses to use.
+---
 
-### Add your media
-
-Open the app, go to **Settings → Library**, and pick a folder. Soyo indexes it
-recursively. There is no `config.json` to edit — everything lives in `db.json`,
-managed from the UI. An existing `config.json` is migrated automatically on
-first run.
-
-### Access from other devices
+## 🐳 Run using Docker
 
 ```bash
-http://<your-lan-ip>:3000   # works everywhere, incl. Android
-http://soyo.local:3000      # macOS, iOS, Windows (mDNS)
+docker pull fal3n4ngel/soyo:latest
+
+# Run container mounting local drives
+docker run -d --restart=unless-stopped -p 3000:3000 --volume=F:\:/Movies --volume=G:\:/Anime --name soyo fal3n4ngel/soyo:latest
 ```
 
-The home page shows both, plus a **QR code** you can scan with a phone.
+> **Note:** Use `--network=host` if you want `soyo.local` mDNS discovery across your local network bridge.
 
-<details>
-<summary><b>A device on my Wi-Fi can't connect</b></summary>
+---
 
-Work down this list — the first two cover almost every case.
+## 🔒 Security & Privacy
 
-1. **Windows Firewall** blocks inbound connections to Node by default. From an
-   elevated PowerShell in the project folder:
-   ```bash
-   npm run allow-firewall
-   ```
-2. **Your Wi-Fi is set to "Public"**, which blocks all LAN traffic regardless of
-   firewall rules. Switch it to Private:
-   ```bash
-   Set-NetConnectionProfile -Name "<your network>" -NetworkCategory Private
-   ```
-3. **Android and Chrome don't resolve `.local` names.** Use the LAN IP or the QR
-   code instead of `soyo.local`.
-4. **Both devices must be on the same network** — guest Wi-Fi and "client
-   isolation" on the router will block it.
+- **100% Local**: No telemetry, no external trackings, no account creation.
+- **PIN Protection**: Lock private folders or categories directly from the settings menu.
 
-**Settings → Network** shows every detected address, which one is primary,
-whether the server is actually bound to your LAN, and why it might not be.
-</details>
+---
 
-
-
-
-
-## Troubleshooting
-
-### 1. Volume Mounting Issues
-- Symptoms
-  + Videos not displaying
-  + Incorrect directory access
-  + Permission-related errors
-
-- Troubleshooting Steps
-  ```node
-  # verify the external / needed drives are mounted
-  # restart the wsl ( within docker desktop )
-  ```
-
-# Contributors
+## 🤝 Contributors
 
 <table>
 <tr>
     <td align="center">
         <a href="https://github.com/fal3n-4ngel">
-            <img src="https://avatars.githubusercontent.com/u/79042374?v=4" width="100;" alt="Jes-ny"/>
+            <img src="https://avatars.githubusercontent.com/u/79042374?v=4" width="100" alt="fal3n-4ngel"/>
             <br />
             <sub><b>Adithya Krishnan</b></sub>
         </a>
     </td>
-   </tr>
+</tr>
 </table>
 
-## License
-This project is open-source and available under the MIT License.
+## 📜 License
+This project is open-source and available under the [MIT License](LICENSE).
 
-
-Interested in improving Soyo? I welcome contributions! Feel free to open issues, submit pull requests, or share your ideas on GitHub. Together, we can make this project even better. 🌟
+For support or issues, visit [https://github.com/fal3n-4ngel/SOYO](https://github.com/fal3n-4ngel/SOYO).
