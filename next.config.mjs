@@ -37,7 +37,7 @@ const nextConfig = {
     ];
   },
 
-  serverExternalPackages: ["bonjour-service", "fluent-ffmpeg"],
+  serverExternalPackages: ["bonjour-service", "fluent-ffmpeg", "webtorrent"],
 };
 
 export default nextConfig;

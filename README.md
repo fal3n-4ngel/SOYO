@@ -24,6 +24,7 @@ SOYO is a privacy-first, zero-cloud media server built with Next.js. It streams 
 
 ## ⚡ Features & Capabilities
 
+- **🔍 Verified In-App Torrent Search**: Search public movie databases directly from Soyo. View poster artwork, seeder/leecher counts, resolution badges (`1080p`, `720p`, `4K`), file size, and launch 1-click WebTorrent streaming.
 - **🧲 Online Torrent & Magnet Streaming**: Paste any `magnet:?xt=urn:btih:...` link or torrent hash to stream video content on-the-fly over HTTP without pre-downloading files to disk. Includes live peer count tracking, file selection, and HTTP Range-based seeking.
 - **👤 Local User Accounts & Custom PFPs**: Create, switch, and manage local profiles with preset emoji avatars or custom uploaded profile pictures. Watch history and Continue Watching targets are isolated per profile.
 - **🏷️ Intelligent Title Recognition & Quality Mapping**: Automatically parses scene release filenames (e.g. `[CC] Back to the Future 1985 1080p BrRip x264 YIFY` $\rightarrow$ **Back to the Future**). Displays badges for **Year**, **Resolution** (`1080P`, `720P`, `4K`), **Source** (`BluRay`, `BRRip`, `WEB-DL`), and **Codec**.
