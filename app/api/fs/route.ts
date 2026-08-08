@@ -18,7 +18,25 @@ const execFileAsync = promisify(execFile);
  */
 
 async function listDrives(): Promise<string[]> {
-  if (process.platform !== "win32") return ["/"];
+  if (process.platform !== "win32") {
+    // On Linux / Docker, list all non-system top-level directories in / as root drives
+    const SYSTEM_DIRS = new Set([
+      "bin", "boot", "dev", "etc", "lib", "lib64", "opt",
+      "proc", "root", "run", "sbin", "srv", "sys", "tmp", "usr", "var", "app"
+    ]);
+
+    try {
+      const rootEntries = fs.readdirSync("/", { withFileTypes: true });
+      const userVolumes = rootEntries
+        .filter((d) => d.isDirectory() && !d.name.startsWith(".") && !SYSTEM_DIRS.has(d.name.toLowerCase()))
+        .map((d) => `/${d.name}`);
+
+      if (userVolumes.length > 0) return userVolumes;
+    } catch {
+      /* fallback */
+    }
+    return ["/"];
+  }
 
   try {
     const { stdout } = await execFileAsync("wmic", ["logicaldisk", "get", "name"], {

@@ -31,6 +31,7 @@ Styling: Tailwind CSS
 
 ## Features
 - Displays video files from configured local media directories across all devices on the local network.
+- Automatic zero-configuration Docker volume discovery for mounted media folders.
 - Live online torrent and magnet streaming via WebTorrent with HTTP range-request support.
 - In-app verified torrent search engine with seeds/leeches counts, resolution tags, and 1-click magnet streaming.
 - Local user profiles with custom avatar uploads and per-profile watch progress tracking.

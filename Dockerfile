@@ -1,9 +1,9 @@
 # Base image
-FROM node:18-alpine
+FROM node:20-alpine
 
 # ffmpeg powers thumbnails, subtitle extraction and on-the-fly transcoding.
-# Without it the container starts fine but every .mkv silently fails to play.
-RUN apk add --no-cache ffmpeg
+# python3, make, and g++ are required for native module compilation (webtorrent, etc.)
+RUN apk add --no-cache ffmpeg python3 make g++
 
 # Set working directory
 WORKDIR /app

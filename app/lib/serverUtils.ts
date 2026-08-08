@@ -19,8 +19,42 @@ const SKIP_DIRS = new Set([
 const MAX_DEPTH = 8;
 
 export function getMediaDirs(): string[] {
-  const dirs = getSettings().mediaDirs.filter((d) => d && d.trim());
-  return dirs.length > 0 ? dirs : [];
+  const dirs = getSettings().mediaDirs.filter((d) => {
+    if (!d || !d.trim()) return false;
+    try {
+      return fs.existsSync(d.trim());
+    } catch {
+      return false;
+    }
+  });
+
+  if (dirs.length > 0) return dirs;
+
+  // Fallback defaults: Auto-discover top-level mounted volumes in / when inside Docker
+  if (process.platform !== "win32") {
+    const SYSTEM_DIRS = new Set([
+      "bin", "boot", "dev", "etc", "lib", "lib64", "opt",
+      "proc", "root", "run", "sbin", "srv", "sys", "tmp", "usr", "var", "app"
+    ]);
+    try {
+      const rootEntries = fs.readdirSync("/", { withFileTypes: true });
+      const volumes = rootEntries
+        .filter((d) => d.isDirectory() && !d.name.startsWith(".") && !SYSTEM_DIRS.has(d.name.toLowerCase()))
+        .map((d) => `/${d.name}`);
+      if (volumes.length > 0) return volumes;
+    } catch {
+      /* fallback */
+    }
+  }
+
+  const candidates = ["/Media", "/Movies", "/Anime", "/videos", "F:/", "G:/", "E:/"];
+  return candidates.filter((d) => {
+    try {
+      return fs.existsSync(d);
+    } catch {
+      return false;
+    }
+  });
 }
 
 export function isPrivatePath(relPath: string, privateFolders: string[]): boolean {
