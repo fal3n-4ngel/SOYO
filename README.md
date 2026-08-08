@@ -1,130 +1,178 @@
-<h1 align="center"> SOYO — Stream On Your Own </h1> 
+<h1 align="center"> SOYO - Stream On Your Own </h1> 
 <h1 align="center">
 
+  <br>
   <div>
-    <a href="https://github.com/fal3n-4ngel/SOYO/issues">
-        <img src="https://img.shields.io/github/issues/fal3n-4ngel/SOYO?color=fab387&labelColor=303446&style=for-the-badge">
+    <a href="https://github.com/fal3n-4ngel/soyo/issues">
+        <img src="https://img.shields.io/github/issues/fal3n-4ngel/soyo?color=fab387&labelColor=303446&style=for-the-badge">
     </a>
-    <a href="https://github.com/fal3n-4ngel/SOYO/stargazers">
-        <img src="https://img.shields.io/github/stars/fal3n-4ngel/SOYO?color=ca9ee6&labelColor=303446&style=for-the-badge">
+    <a href="https://github.com/fal3n-4ngel/soyo/stargazers">
+        <img src="https://img.shields.io/github/stars/fal3n-4ngel/soyo?color=ca9ee6&labelColor=303446&style=for-the-badge">
     </a>
-    <a href="https://github.com/fal3n-4ngel/SOYO">
-        <img src="https://img.shields.io/github/repo-size/fal3n-4ngel/SOYO?color=ea999c&labelColor=303446&style=for-the-badge">
+    <a href="https://github.com/fal3n-4ngel/soyo">
+        <img src="https://img.shields.io/github/repo-size/fal3n-4ngel/soyo?color=ea999c&labelColor=303446&style=for-the-badge">
     </a>
-    <a href="https://github.com/fal3n-4ngel/SOYO/blob/main/LICENSE">
+    <a href="https://github.com/fal3n-4ngel/soyo/LICENSE">
         <img src="https://img.shields.io/static/v1.svg?style=for-the-badge&label=License&message=MIT&logoColor=ca9ee6&colorA=313244&colorB=cba6f7"/>
     </a>
-  </div>
-</h1>
+    <br>
+    </div>
+
+   </h1>
 
 ## What is SOYO?
-SOYO is a privacy-first, zero-cloud media server built with Next.js. It streams your local media library (movies, series, anime) to any device on your home Wi-Fi network without requiring cloud uploads, user accounts, or external tracking.
+SOYO is a Next.js web application designed to display and stream video files stored on local drives across your local network. It allows you to browse, search, and watch your media collection from any device without requiring a central cloud server.<br/>Wanted to watch animes on phone but low on storage , so proceeded to spend hours in this
 
----
+## Technical Details
+```
+Framework: Next.js
+Styling: Tailwind CSS
+```
 
-## ⚡ Features & Capabilities
-
-- **🔍 Verified In-App Torrent Search**: Search public movie databases directly from Soyo. View poster artwork, seeder/leecher counts, resolution badges (`1080p`, `720p`, `4K`), file size, and launch 1-click WebTorrent streaming.
-- **🧲 Online Torrent & Magnet Streaming**: Paste any `magnet:?xt=urn:btih:...` link or torrent hash to stream video content on-the-fly over HTTP without pre-downloading files to disk. Includes live peer count tracking, file selection, and HTTP Range-based seeking.
-- **👤 Local User Accounts & Custom PFPs**: Create, switch, and manage local profiles with preset emoji avatars or custom uploaded profile pictures. Watch history and Continue Watching targets are isolated per profile.
-- **🏷️ Intelligent Title Recognition & Quality Mapping**: Automatically parses scene release filenames (e.g. `[CC] Back to the Future 1985 1080p BrRip x264 YIFY` $\rightarrow$ **Back to the Future**). Displays badges for **Year**, **Resolution** (`1080P`, `720P`, `4K`), **Source** (`BluRay`, `BRRip`, `WEB-DL`), and **Codec**.
-- **🔥 Curated Media Rails**: Includes **Trending Now**, **Most Watched**, and **Recently Added** carousels with configurable settings toggles under `/config`.
-- **🎨 Telescope-Inspired Design & Physics**: Scandinavian minimalist aesthetic featuring GPU-accelerated 3D magnetic parallax (`translate3d`) and fluid sine-wave floating collages.
-- **🌐 Network Discovery & QR Panel**: Automatic mDNS broadcasting (`http://soyo.local:3000`), one-click universal LAN IP copy button, and constant QR code scanning for mobile devices.
-- **⚡ Ultrafast Streaming Engine**: Instant playback start (`-analyzeduration 1000000 -probesize 1000000`), zero-freeze timestamp reconstruction (`-avoid_negative_ts make_zero`), and embedded subtitle WebVTT memory caching (`vttCache`).
-
----
+## Features
+- Displays video files from configured local media directories across all devices on the local network.
+- Live online torrent and magnet streaming via WebTorrent with HTTP range-request support.
+- In-app verified torrent search engine with seeds/leeches counts, resolution tags, and 1-click magnet streaming.
+- Local user profiles with custom avatar uploads and per-profile watch progress tracking.
+- Intelligent scene filename parsing for clean movie titles, release year, resolution (1080p, 720p, 4K), and source badges.
+- Curated media rails for Trending, Most Watched, and Recently Added titles with settings toggles.
+- Fetches anime thumbnails from AniList API and movie posters from OMDb API with local thumbnail fallbacks.
+- Hardware-accelerated 3D magnetic parallax UI with customizable theme accents.
 
 ### Screenshots
 
-<div align="center">
+
   <img src="https://github.com/user-attachments/assets/8784693b-1431-46cd-8b0e-d98147396aa4" alt="Laptop view" width="400"/>
   <img src="https://github.com/user-attachments/assets/1d6fa291-4c01-4f1c-969a-7ad48e23afd7" alt="Mobile view" width="400" />
-</div>
+  <img src="https://github.com/user-attachments/assets/834900fc-00ad-43fb-9892-fa55fc1d6e6e" alt="Mobile view" width="400" />
+  <img src="https://github.com/user-attachments/assets/2c9a0ad8-aa4e-4063-a0a8-7f14f5a3d727" alt="Laptop view" width="400"/>
 
----
+  
 
-## 🚀 Quick Start (Node.js)
+## Run using Docker
 
-### 1. Clone the Repository:
+### DockerHub Image
+
 ```bash
+docker pull fal3n4ngel/soyo
+```
+
+ <h3>Prerequisites</h3>
+
+  <ul>
+    <li>Docker Desktop installed</li>
+    <li>Sufficient permissions to run Docker</li>
+    <li>Access to local video directories</li>
+  </ul>
+
+<details>
+  <summary><strong>Custom Building</strong></summary>
+
+<p><strong>Install Docker Desktop:</strong></p>
+<ul>
+  <li><strong>Windows/Mac:</strong> Download from Docker's official website</li>
+  <li><strong>Linux:</strong> Use package manager or follow the official Docker CE installation guides</li>
+</ul>
+
+<p><strong>Build Docker Image</strong></p>
+<pre>
+<code>
+docker build -t soyo .  
+docker build -t soyo:v1.0 . # build with specific tag
+</code>
+</pre>
+
+</details>
+
+
+Run Docker Container
+  ```bash
+# Basic run 
+docker run -d -p 3000:3000 --volume=F:/:/Movies --volume=G:/:/Anime --name soyo fal3n4ngel/soyo:latest
+
+# Run with auto-restart policy
+docker run -d --restart=unless-stopped -p 3000:3000 --volume=F:\:/Movies --volume=G:\:/Anime --name soyo fal3n4ngel/soyo:latest
+
+  ```
+### Access the Website: 
+
+  Open your browser and navigate to 
+  ```bash
+  http://{ip}:3000
+  ```
+
+
+## Run Using Node.js
+
+### Clone the Repository:
+```bash
+
 git clone https://github.com/fal3n-4ngel/SOYO.git
 cd SOYO
 ```
-
-### 2. Install Dependencies:
+### Install Dependencies:
 ```bash
+
 npm install
+
 ```
 
-### 3. Install FFmpeg:
-Playback of non-browser formats (MKV, HEVC, AC3) and subtitle extraction require `ffmpeg` and `ffprobe` on your `PATH`:
-```bash
-winget install Gyan.FFmpeg      # Windows
-brew install ffmpeg             # macOS
-sudo apt install ffmpeg         # Linux
-```
-
-### 4. Run Development Server:
+### Run the Development Server:
 ```bash
 npm run dev
 ```
 
-Open `http://localhost:3000` or `http://soyo.local:3000` from any device on your Wi-Fi network.
-
-### 5. Run Production Server:
+### Run the Production Server:
 ```bash
 npm run build
 npm run start
 ```
 
----
+### Access the Website: 
 
-## 🐳 Run using Docker
-
+Open your browser and navigate to 
 ```bash
-docker pull fal3n4ngel/soyo:latest
-
-# Run Docker container mounting local media drives
-docker run -d --restart=unless-stopped -p 3000:3000 --volume=F:\:/Movies --volume=G:\:/Anime --name soyo fal3n4ngel/soyo:latest
+http://{ip}:3000   # if Development Server
+``` 
+```bash 
+http://{ip}:3000   # if Production Server
 ```
+ to view the website.
 
-> **Note:** Use `--network=host` if you want `soyo.local` mDNS discovery to work across your local network bridge.
 
----
 
-## ⚙️ Configuration & Settings
 
-Open **Settings (`/config`)** in your browser to:
-- Add or modify scanned media directories.
-- Configure PIN lock protection for private folders.
-- Enable or disable **Trending**, **Most Watched**, and **Recently Added** media rails.
-- Adjust playback quality, transcoding rules, and frame extraction position.
 
----
+## Troubleshooting
 
-## 🔒 Security & Privacy
+### 1. Volume Mounting Issues
+- Symptoms
+  + Videos not displaying
+  + Incorrect directory access
+  + Permission-related errors
 
-- **100% Local**: No telemetry, no external tracking, no cloud dependencies.
-- **PIN Protection**: Secure private folders or categories directly from the settings menu.
+- Troubleshooting Steps
+  ```node
+  # verify the external / needed drives are mounted
+  # restart the wsl ( within docker desktop )
+  ```
 
----
-
-## 🤝 Contributors
+# Contributors
 
 <table>
 <tr>
     <td align="center">
         <a href="https://github.com/fal3n-4ngel">
-            <img src="https://avatars.githubusercontent.com/u/79042374?v=4" width="100" alt="fal3n-4ngel"/>
+            <img src="https://avatars.githubusercontent.com/u/79042374?v=4" width="100;" alt="Jes-ny"/>
             <br />
             <sub><b>Adithya Krishnan</b></sub>
         </a>
     </td>
-</tr>
+   </tr>
 </table>
 
-## 📜 License
-This project is open-source and available under the [MIT License](LICENSE).
+## License
+This project is open-source and available under the MIT License.
 
-Interested in improving SOYO? Contributions are welcome! Open issues, submit pull requests, or share ideas on [GitHub](https://github.com/fal3n-4ngel/SOYO). 🌟
+
+Interested in improving Soyo? I welcome contributions! Feel free to open issues, submit pull requests, or share your ideas on GitHub. Together, we can make this project even better.
