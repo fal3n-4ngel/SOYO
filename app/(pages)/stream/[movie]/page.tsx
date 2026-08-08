@@ -1,150 +1,249 @@
 "use client";
-import React, { useState, useEffect, useCallback } from "react";
-import VideoPlayer from "@/app/components/VideoPlayer";
+
+import { use, useCallback, useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { ArrowLeft, Folder, Heart, Info, Play, RotateCcw } from "lucide-react";
+import Nav from "@/app/components/Nav";
+import VideoPlayer, { type MediaInfo } from "@/app/components/VideoPlayer";
+import DynamicThumbnail from "@/app/components/DynamicThumbnail";
+import {
+  formatBytes,
+  formatDuration,
+  prettyTitle,
+  type Movie,
+  type MoviesResponse,
+} from "@/app/lib/types";
 
-interface Movie {
-  name: string;
-  thumbnail: string;
-}
+export default function StreamPage({ params }: { params: Promise<{ movie: string }> }) {
+  const { movie } = use(params);
+  const name = decodeURIComponent(movie);
+  const router = useRouter();
 
-export default function StreamPage({ params }: { params: { movie: string } }) {
-  const decodedMovie = decodeURIComponent(params.movie);
-  const [isLoading, setIsLoading] = useState(true);
-  const [upNext, setUpNext] = useState<Movie[]>([]);
-  const [isDarkMode, setIsDarkMode] = useState(true);
+  const [info, setInfo] = useState<MediaInfo | null>(null);
+  const [library, setLibrary] = useState<MoviesResponse | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [favorite, setFavorite] = useState(false);
 
-  // Load dark mode preference from localStorage
   useEffect(() => {
-    const storedDarkMode = localStorage.getItem("isDarkMode");
-    if (storedDarkMode !== null) {
-      setIsDarkMode(JSON.parse(storedDarkMode));
-    }
-  }, []);
+    let cancelled = false;
 
-  // Fetch movies and handle recently watched
-  useEffect(() => {
-    const fetchMovies = async () => {
-      try {
-        const response = await fetch("/api/movies");
-        if (!response.ok) throw new Error("Failed to fetch movies");
+    fetch(`/api/media/${encodeURIComponent(name)}`)
+      .then(async (response) => {
         const data = await response.json();
+        if (!response.ok) throw new Error(data.error || "Could not load this title");
+        return data;
+      })
+      .then((data) => {
+        if (cancelled) return;
+        setInfo(data);
+        setFavorite(data.favorite);
+      })
+      .catch((err) => !cancelled && setError(err.message));
 
-        // Filter and set "Up Next" movies
-        const filteredMovies = data
-          .filter((movie: Movie) => movie.name !== decodedMovie)
-          .slice(0, 5);
-        setUpNext(filteredMovies);
+    fetch("/api/movies")
+      .then((response) => response.json())
+      .then((data) => !cancelled && setLibrary(data))
+      .catch(() => undefined);
 
-        // Update recently watched
-        const currentMovie = data.find((movie: Movie) => movie.name === decodedMovie);
-        if (currentMovie) {
-          const recentlyWatched = JSON.parse(localStorage.getItem("recentlyWatched") || "[]");
-          const updatedRecent = [
-            currentMovie,
-            ...recentlyWatched.filter((m: Movie) => m.name !== currentMovie.name),
-          ].slice(0, 10);
-          localStorage.setItem("recentlyWatched", JSON.stringify(updatedRecent));
-        }
-      } catch (error) {
-        console.error("Error fetching movies:", error);
-      } finally {
-        setIsLoading(false);
-      }
+    return () => {
+      cancelled = true;
     };
+  }, [name]);
 
-    fetchMovies();
-  }, [decodedMovie]);
+  const toggleFavorite = useCallback(async () => {
+    setFavorite((value) => !value);
+    await fetch("/api/progress", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ movie: name, action: "favorite" }),
+    }).catch(() => undefined);
+  }, [name]);
 
-  // Format movie titles
-  const formatTitle = useCallback((name: string) => {
-    return name
-      .replaceAll("_", " ")
-      .replaceAll("@", " ")
-      .replaceAll(".", " ")
-      .replace(/\[MZM\]|mkv|mp4|avi|CV/g, "")
-      .trim();
-  }, []);
+  const handleEnded = useCallback(() => {
+    if (info?.settings.autoplayNext && info.next) {
+      router.push(`/stream/${encodeURIComponent(info.next.name)}`);
+    }
+  }, [info, router]);
 
-  if (isLoading) {
+  // "Up next" prefers the same folder, then falls back to anything unwatched.
+  const upNext: Movie[] = (() => {
+    if (!library) return [];
+    const others = library.movies.filter((m) => m.name !== name);
+    const sameFolder = others.filter((m) => m.folder === (library.movies.find((x) => x.name === name)?.folder ?? ""));
+    return (sameFolder.length > 0 ? sameFolder : others).slice(0, 8);
+  })();
+
+  if (error) {
     return (
-      <div
-        className={`flex items-center justify-center min-h-screen ${
-          isDarkMode ? "bg-[#141414] text-white" : "bg-white text-black"
-        }`}
-      >
-        <div className="loader w-12 h-12 border-4 border-t-transparent rounded-full animate-spin"></div>
+      <div className="min-h-screen bg-bg">
+        <Nav />
+        <div className="mx-auto max-w-lg px-5 py-24 text-center">
+          <h1 className="text-2xl font-bold tracking-tight text-fg">Can&apos;t play this</h1>
+          <p className="mt-2 text-sm text-muted">{error}</p>
+          <Link href="/browse" className="btn btn-primary mt-7">
+            Back to library
+          </Link>
+        </div>
       </div>
     );
   }
 
+  const probe = info?.probe;
+
   return (
-    <div className={`min-h-screen transition-colors  bg-white text-black`}>
-      {/* Navbar */}
-      <nav className="fixed bg-white w-full z-50 ">
-        <div className="container mx-auto flex justify-between items-center px-6 py-4">
-          <Link href="/" className="text-3xl font-bold dancing-script text-black">
-            SOYO
-          </Link>
-          <div className="hidden md:flex space-x-6 text-black">
-          <Link
-            href="/"
-            className="group relative inline-block hover:cursor-pointer"
-          >
-            <span className="py-2 text-black">HOME</span>
-            <span className="absolute left-0 top-8 h-[2px] w-0 bg-black transition-all duration-300 group-hover:w-full"></span>
-          </Link>
-          <Link
-            href="/#continue"
-            className="group relative inline-block hover:cursor-pointer"
-          >
-            <span className="py-2 text-black">TRENDING</span>
-            <span className="absolute left-0 top-8 h-[2px] w-0 bg-black transition-all duration-300 group-hover:w-full"></span>
-          </Link>
-          <Link
-            href="/#explore"
-            className="group relative inline-block hover:cursor-pointer"
-          >
-            <span className="py-2 text-black">EXPLORE</span>
-            <span className="absolute left-0 top-8 h-[2px] w-0 bg-black transition-all duration-300 group-hover:w-full"></span>
-          </Link>
-          </div>
-        </div>
-      </nav>
+    <div className="min-h-screen bg-bg">
+      <Nav isUnlocked={library?.isUnlocked} hasPin={library?.hasPin} />
 
-      {/* Main Content */}
-      <main className="container mx-auto flex flex-col md:flex-row gap-8 px-6 py-20 md:py-[150px] ">
-        {/* Video Player Section */}
-        <div className="w-full md:w-3/4 ">
-          <VideoPlayer movie={params.movie} />
-          <h2 className="text-lg sm:text-xl font-semibold mt-4 text-gray-800">
-        {decodedMovie
-          .replaceAll("_", " ")
-          .replaceAll("@", " ")
-          .replaceAll(".", " ")
-          .replaceAll("[MZM]", " ")
-          .replace(/\.(mkv|mp4|avi|CV)/g, " ")}
-      </h2>
-        </div>
+      <main className="mx-auto max-w-[1800px] px-5 py-6 sm:px-8">
+        <Link
+          href="/browse"
+          className="mb-4 inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.16em] text-subtle transition-colors hover:text-fg"
+        >
+          <ArrowLeft className="h-3 w-3" /> Library
+        </Link>
 
-        {/* Up Next Section */}
-        <aside className="w-full md:w-1/4">
-          <h3 className="text-2xl font-semibold mb-4 quicksand">Up Next</h3>
-          <div className="space-y-4">
-            {upNext.map((video, index) => (
-              <Link
-                key={index}
-                href={`/stream/${encodeURIComponent(video.name)}`}
-                className="flex gap-4 items-center rounded-lg  p-2 transition-all shadow-sm bg-[#f0f0f0] hover:scale-105 "
-              >
-                <div className="w-24 h-16 flex-shrink-0 rounded-md overflow-hidden">
-                  <img src={video.thumbnail} alt={video.name} className="w-full h-full object-cover" />
+        <div className="flex flex-col gap-8 xl:flex-row">
+          <div className="min-w-0 flex-1">
+            {info ? (
+              <VideoPlayer movie={name} info={info} onEnded={handleEnded} />
+            ) : (
+              <div className="aspect-video w-full rounded-2xl skeleton" />
+            )}
+
+            <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+              <div className="min-w-0">
+                <h1 className="text-2xl font-bold leading-tight tracking-tight text-fg sm:text-3xl">
+                  {prettyTitle(name)}
+                </h1>
+
+                <div className="mt-2.5 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[10px] font-bold uppercase tracking-widest text-subtle">
+                  {info?.folder && (
+                    <span className="flex items-center gap-1.5">
+                      <Folder className="h-3 w-3" /> {info.folder}
+                    </span>
+                  )}
+                  {probe?.height ? <span>{probe.height}p</span> : null}
+                  {probe?.duration ? <span>{formatDuration(probe.duration)}</span> : null}
+                  {info?.size ? <span>{formatBytes(info.size)}</span> : null}
+                  {probe?.videoCodec && <span>{probe.videoCodec.toUpperCase()}</span>}
+                  {info && (
+                    <span className="rounded bg-inset px-2 py-0.5 text-fg">
+                      {info.delivery === "direct"
+                        ? "Direct"
+                        : info.delivery === "remux"
+                          ? "Remuxed"
+                          : "Transcoded"}
+                    </span>
+                  )}
                 </div>
-                <p className="font-medium line-clamp-2">{formatTitle(video.name)}</p>
-              </Link>
-            ))}
+              </div>
+
+              <div className="flex shrink-0 gap-2">
+                <button
+                  onClick={toggleFavorite}
+                  className={`btn btn-ghost ${favorite ? "text-danger" : ""}`}
+                >
+                  <Heart className={`h-3.5 w-3.5 ${favorite ? "fill-current" : ""}`} />
+                  <span className="hidden sm:inline">{favorite ? "Saved" : "Save"}</span>
+                </button>
+
+                <button
+                  onClick={async () => {
+                    await fetch("/api/progress", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ movie: name, action: "reset" }),
+                    });
+                    window.location.reload();
+                  }}
+                  className="btn btn-ghost"
+                  title="Forget my position in this file"
+                >
+                  <RotateCcw className="h-3.5 w-3.5" />
+                  <span className="hidden sm:inline">Reset</span>
+                </button>
+              </div>
+            </div>
+
+            {info && !info.seekable && (
+              <p className="mt-4 flex items-start gap-2 rounded-lg border border-line bg-inset px-4 py-3 text-xs leading-relaxed text-muted">
+                <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                This file is being converted on the fly, so seeking restarts the stream from the
+                point you pick. Converting the file to MP4/H.264 gives instant seeking.
+              </p>
+            )}
           </div>
-        </aside>
+
+          {/* ------------------------------------------------------ Up next */}
+          <aside className="w-full shrink-0 xl:w-[340px]">
+            {info?.next && (
+              <>
+                <h2 className="eyebrow mb-3">Next in this folder</h2>
+                <Link
+                  href={`/stream/${encodeURIComponent(info.next.name)}`}
+                  className="group mb-8 flex gap-3 rounded-xl border border-line bg-elevated p-3 transition-colors hover:border-line-strong"
+                >
+                  <div className="relative aspect-video w-32 shrink-0 overflow-hidden rounded-lg">
+                    <DynamicThumbnail
+                      movieName={info.next.name}
+                      thumbnailUrl={info.next.thumbnail}
+                      preview={false}
+                    />
+                    <span className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity group-hover:opacity-100">
+                      <Play className="h-5 w-5 fill-white text-white" />
+                    </span>
+                  </div>
+                  <div className="min-w-0 self-center">
+                    <p className="line-clamp-2 text-sm font-semibold text-fg">
+                      {prettyTitle(info.next.name)}
+                    </p>
+                  </div>
+                </Link>
+              </>
+            )}
+
+            <h2 className="eyebrow mb-3">Up next</h2>
+            <div className="flex flex-col gap-2">
+              {upNext.map((item) => (
+                <Link
+                  key={item.name}
+                  href={`/stream/${encodeURIComponent(item.name)}`}
+                  className="group flex gap-3 rounded-xl border border-line bg-elevated p-2.5 transition-colors hover:border-line-strong"
+                >
+                  <div className="relative aspect-video w-28 shrink-0 overflow-hidden rounded-lg">
+                    <DynamicThumbnail
+                      movieName={item.name}
+                      thumbnailUrl={item.thumbnail}
+                      preview={false}
+                    />
+                    {item.duration > 0 && item.progress > 0 && (
+                      <span className="absolute inset-x-0 bottom-0 h-0.5 bg-black/50">
+                        <span
+                          className="block h-full bg-accent"
+                          style={{ width: `${(item.progress / item.duration) * 100}%` }}
+                        />
+                      </span>
+                    )}
+                  </div>
+                  <div className="min-w-0 self-center">
+                    <p className="line-clamp-2 text-[13px] font-semibold leading-snug text-fg">
+                      {prettyTitle(item.name)}
+                    </p>
+                    <span className="mt-1 block text-[10px] font-bold uppercase tracking-widest text-subtle">
+                      {item.format.replace(".", "")} · {formatBytes(item.size)}
+                    </span>
+                  </div>
+                </Link>
+              ))}
+
+              {!library &&
+                Array.from({ length: 5 }).map((_, index) => (
+                  <div key={index} className="h-[76px] rounded-xl skeleton" />
+                ))}
+            </div>
+          </aside>
+        </div>
       </main>
     </div>
   );

@@ -8,6 +8,10 @@
 
 /config.json
 
+# soyo user data — settings, watch history and generated artwork
+/db.json
+/.soyo-thumbs/*
+
 # testing
 /coverage
 

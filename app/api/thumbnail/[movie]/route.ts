@@ -1,183 +1,174 @@
 import fs from "fs";
+import path from "path";
+import crypto from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { Readable } from "stream";
-import path from "path";
 import axios from "axios";
-import { readConfig } from '@/app/lib/serverUtils';
+import ffmpeg from "fluent-ffmpeg";
+import { findMovieFile, getMovieMeta, getThumbnailDir } from "@/app/lib/serverUtils";
+import { isUnlocked } from "@/app/lib/session";
+import { getSettings } from "@/app/lib/db";
+import { probeSafe } from "@/app/lib/media";
 
-function getMovieDir() {
-  const config = readConfig();
-  return config.movieDir || process.env.MOVIE_DIR || 'F:/';
+export const dynamic = "force-dynamic";
+
+/** Cache key is derived from the name so odd filenames stay filesystem-safe. */
+function cachePath(movieName: string): string {
+  const hash = crypto.createHash("sha1").update(movieName).digest("hex").slice(0, 16);
+  return path.join(getThumbnailDir(), `${hash}.jpg`);
 }
 
-// Fetch AniList Thumbnail (returns URL of the image)
-async function fetchAniListThumbnail(movieName: string) {
-  const query = `
-    query {
-      Media(search: "${movieName}", type: ANIME) {
-        coverImage {
-          large
-        }
-      }
-    }
-  `;
+/** De-duplicates concurrent generation — a grid of 60 tiles asks all at once. */
+const inFlight = new Map<string, Promise<boolean>>();
 
-  const url = "https://graphql.anilist.co";
-  const headers = {
-    "Content-Type": "application/json",
-  };
+function extractFrame(videoPath: string, outputPath: string, percent: number): Promise<boolean> {
+  const existing = inFlight.get(outputPath);
+  if (existing) return existing;
 
-  try {
-    const response = await axios.post(url, JSON.stringify({ query }), { headers });
-    console.log("AniList Response:", response.data);  // Log the full response
-    const data = response.data.data.Media;
-    if (data && data.coverImage && data.coverImage.large) {
-      console.log("Found AniList Thumbnail:", data.coverImage.large);  // Log the thumbnail URL
-      return data.coverImage.large;
-    }
-  } catch (error) {
-    console.error("Error fetching AniList thumbnail:", error);
-  }
-  return null;
-}
+  const job = (async () => {
+    const probeResult = await probeSafe(videoPath);
+    const duration = probeResult?.duration ?? 0;
+    // Seeking to a timestamp is far faster and more reliable than fluent's
+    // percentage-based screenshots on large files.
+    const seconds = duration > 0 ? Math.max(1, (duration * percent) / 100) : 5;
 
-function cleanMovieName(movieName: string) {
-  let cleanedName = movieName.replace(/\.(mkv|mp4|avi|flv|webm|mov|wmv|_|.|\+|-|-mkv|)$/i, '').trim();
-  cleanedName = cleanedName.replace(/\b(720p|1080p|480p|HEVC|4K|HD|SD|BluRay|BRRip|HDRip)\b/g, '').trim();
-  cleanedName = cleanedName.replace(/\b(Hindi|English|Tamil|Telugu|ESub|AAC|x264|x265|HEVC|WEB-DL|BluRay|Org|VCD|YIFY|YTS|AMZN|BiGiL)\b/g, '').trim();
-  cleanedName = cleanedName.replace(/\[.*?\]/g, '').trim();
-  cleanedName = cleanedName.replace(/_/g, ' ').trim();
-  cleanedName = cleanedName.replace(/\s+/g, ' ').trim();
-  cleanedName = cleanedName.replace(/\b\d{4}\b/g, '').trim();
-  return cleanedName;
-}
-
-// Fetch IMDb Thumbnail (returns URL of the image)
-async function fetchIMDbThumbnail(movieName: string) {
-  const apiKey = process.env.IMDB_API_KEY; // Use your OMDb API key here
-  const cleanedName = cleanMovieName(movieName);
-
-  const url = `http://www.omdbapi.com/?t=${cleanedName}&apikey=${apiKey}`;
-
-  try {
-    const response = await axios.get(url);
-    if (response.data.Response === "True") {
-      console.log("Found IMDb Thumbnail:", response.data.Poster);
-      return response.data.Poster; // Return the poster URL
-    }
-  } catch (error) {
-    console.error("Error fetching IMDb thumbnail:", error);
-  }
-  return null;
-}
-
-function saveThumbnailToFile(thumbnailUrl: string, movieName: string) {
-  const movieDir = getMovieDir();
-  const thumbnailPath = path.join(movieDir, 'thumbnails', `${movieName}.jpg`);
-
-  return axios({
-    url: thumbnailUrl,
-    method: 'GET',
-    responseType: 'stream',
-  }).then(response => {
-    return new Promise((resolve, reject) => {
-      const writer = fs.createWriteStream(thumbnailPath);
-      response.data.pipe(writer);
-
-      writer.on('finish', () => resolve(thumbnailPath));
-      writer.on('error', reject);
+    return new Promise<boolean>((resolve) => {
+      ffmpeg(videoPath)
+        .inputOptions(["-ss", seconds.toFixed(2)])
+        .outputOptions(["-frames:v 1", "-q:v 4", "-vf scale=-2:480"])
+        .output(outputPath)
+        .on("end", () => resolve(fs.existsSync(outputPath)))
+        .on("error", () => resolve(false))
+        .run();
     });
-  }).catch(err => {
-    console.error("Error saving thumbnail:", err);
+  })().finally(() => inFlight.delete(outputPath));
+
+  inFlight.set(outputPath, job);
+  return job;
+}
+
+function cleanMovieName(movieName: string): string {
+  return movieName
+    .replace(/\.[^.]+$/, "")
+    .replace(/\[.*?\]|\(.*?\)/g, " ")
+    .replace(
+      /\b(720p|1080p|2160p|480p|4K|UHD|HDR|HEVC|x264|x265|AAC|AC3|DTS|WEB-?DL|WEBRip|BluRay|BRRip|HDRip|DVDRip|ESub|Dual|Audio|YIFY|YTS|AMZN|NF|PROPER|REPACK)\b/gi,
+      " "
+    )
+    .replace(/\b(19|20)\d{2}\b/g, " ")
+    .replace(/[._-]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+async function fetchArtwork(movieName: string): Promise<string | null> {
+  const cleaned = cleanMovieName(movieName);
+  if (!cleaned) return null;
+
+  const omdbKey = process.env.IMDB_API_KEY || process.env.OMDB_API_KEY;
+  if (omdbKey) {
+    try {
+      const { data } = await axios.get("https://www.omdbapi.com/", {
+        params: { t: cleaned, apikey: omdbKey },
+        timeout: 6000,
+      });
+      if (data?.Response === "True" && data.Poster && data.Poster !== "N/A") return data.Poster;
+    } catch {
+      /* fall through to AniList */
+    }
+  }
+
+  try {
+    const { data } = await axios.post(
+      "https://graphql.anilist.co",
+      {
+        query: `query ($search: String) {
+          Media(search: $search, type: ANIME) { coverImage { large } }
+        }`,
+        variables: { search: cleaned },
+      },
+      { headers: { "Content-Type": "application/json" }, timeout: 6000 }
+    );
+    return data?.data?.Media?.coverImage?.large ?? null;
+  } catch {
+    return null;
+  }
+}
+
+async function downloadTo(url: string, destination: string): Promise<boolean> {
+  try {
+    const response = await axios.get(url, { responseType: "arraybuffer", timeout: 10_000 });
+    fs.writeFileSync(destination, Buffer.from(response.data));
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function placeholder(): NextResponse {
+  const local = path.join(process.cwd(), "public", "default.jpg");
+  if (fs.existsSync(local)) {
+    const file = fs.createReadStream(local);
+    return new NextResponse(Readable.toWeb(file) as ReadableStream, {
+      status: 200,
+      headers: { "Content-Type": "image/jpeg", "Cache-Control": "public, max-age=60" },
+    });
+  }
+
+  // No asset on disk — emit a neutral tile rather than a broken image.
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="640" height="360">
+    <rect width="640" height="360" fill="#18181b"/>
+    <text x="50%" y="52%" text-anchor="middle" fill="#52525b"
+      font-family="system-ui, sans-serif" font-size="28" font-weight="600">soyo</text>
+  </svg>`;
+
+  return new NextResponse(svg, {
+    status: 200,
+    headers: { "Content-Type": "image/svg+xml", "Cache-Control": "public, max-age=60" },
   });
 }
 
-export async function GET(request: NextRequest, { params }: { params: { movie: string } }) {
-  const movieDir = getMovieDir();
-  const { movie } = params;
-  const movieNameWithoutExtension = movie.split(".").slice(0, -1).join(".");
-  const thumbnailPath = path.join(movieDir, 'thumbnails', `${movieNameWithoutExtension}.jpg`);
-  const defaultThumbnailPath = path.join(process.cwd(), 'public', 'default.jpg');
+export async function GET(
+  _request: NextRequest,
+  { params }: { params: Promise<{ movie: string }> }
+) {
+  const { movie } = await params;
+  const decoded = decodeURIComponent(movie);
 
-  // Check if the local thumbnail exists
-  if (fs.existsSync(thumbnailPath)) {
-    const thumbnailStat = fs.statSync(thumbnailPath);
-    const thumbnailFileSize = thumbnailStat.size;
-    const thumbnailRange = request.headers.get("range");
+  const meta = getMovieMeta(decoded);
+  if (meta?.private && !(await isUnlocked())) return placeholder();
 
-    if (thumbnailRange) {
-      const parts = thumbnailRange.replace(/bytes=/, "").split("-");
-      const start = parseInt(parts[0], 10);
-      const end = parts[1] ? parseInt(parts[1], 10) : thumbnailFileSize - 1;
-      const chunksize = end - start + 1;
-      const file = fs.createReadStream(thumbnailPath, { start, end });
-      const head = {
-        "Content-Range": `bytes ${start}-${end}/${thumbnailFileSize}`,
-        "Accept-Ranges": "bytes",
-        "Content-Length": chunksize.toString(),
-        "Content-Type": "image/jpeg",
-      };
-      return new NextResponse(Readable.toWeb(file) as ReadableStream, {
-        status: 206,
-        headers: head,
-      });
-    } else {
-      const head = {
-        "Content-Length": thumbnailFileSize.toString(),
-        "Content-Type": "image/jpeg",
-      };
-      const file = fs.createReadStream(thumbnailPath);
-      return new NextResponse(Readable.toWeb(file) as ReadableStream, {
-        status: 200,
-        headers: head,
-      });
+  const settings = getSettings();
+  const target = cachePath(decoded);
+
+  if (!fs.existsSync(target)) {
+    if (!settings.thumbnailsEnabled) return placeholder();
+
+    const videoPath = findMovieFile(decoded);
+    let generated = false;
+
+    if (videoPath) {
+      generated = await extractFrame(videoPath, target, settings.thumbnailTimemark);
     }
+
+    if (!generated && settings.externalArtwork) {
+      const url = await fetchArtwork(decoded);
+      if (url) generated = await downloadTo(url, target);
+    }
+
+    if (!generated) return placeholder();
   }
 
-  // Fetch external thumbnails if not found locally
-  let externalThumbnailUrl = await fetchIMDbThumbnail(movieNameWithoutExtension);
-  if (!externalThumbnailUrl) {
-    externalThumbnailUrl = await fetchAniListThumbnail(movieNameWithoutExtension);
-  }
+  const stat = fs.statSync(target);
+  const file = fs.createReadStream(target);
 
-  const finalThumbnailUrl = externalThumbnailUrl || defaultThumbnailPath;
-
-  // Cache the thumbnail if an external URL was fetched
-  if (externalThumbnailUrl) {
-    await saveThumbnailToFile(externalThumbnailUrl, movieNameWithoutExtension);
-  }
-
-  // Serve the thumbnail
-  const thumbnailFile = fs.existsSync(finalThumbnailUrl) ? finalThumbnailUrl : defaultThumbnailPath;
-  const thumbnailStat = fs.statSync(thumbnailFile);
-  const thumbnailFileSize = thumbnailStat.size;
-  const thumbnailRange = request.headers.get("range");
-
-  if (thumbnailRange) {
-    const parts = thumbnailRange.replace(/bytes=/, "").split("-");
-    const start = parseInt(parts[0], 10);
-    const end = parts[1] ? parseInt(parts[1], 10) : thumbnailFileSize - 1;
-    const chunksize = end - start + 1;
-    const file = fs.createReadStream(thumbnailFile, { start, end });
-    const head = {
-      "Content-Range": `bytes ${start}-${end}/${thumbnailFileSize}`,
-      "Accept-Ranges": "bytes",
-      "Content-Length": chunksize.toString(),
+  return new NextResponse(Readable.toWeb(file) as ReadableStream, {
+    status: 200,
+    headers: {
       "Content-Type": "image/jpeg",
-    };
-    return new NextResponse(Readable.toWeb(file) as ReadableStream, {
-      status: 206,
-      headers: head,
-    });
-  } else {
-    const head = {
-      "Content-Length": thumbnailFileSize.toString(),
-      "Content-Type": "image/jpeg",
-    };
-    const file = fs.createReadStream(thumbnailFile);
-    return new NextResponse(Readable.toWeb(file) as ReadableStream, {
-      status: 200,
-      headers: head,
-    });
-  }
+      "Content-Length": String(stat.size),
+      // Cached thumbnails are content-addressed by name; safe to cache hard.
+      "Cache-Control": "public, max-age=86400",
+    },
+  });
 }
