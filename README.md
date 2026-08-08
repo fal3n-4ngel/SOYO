@@ -1,5 +1,3 @@
-
-   
 <h1 align="center"> SOYO - Stream On Your Own </h1> 
 <h1 align="center">
 
@@ -23,7 +21,7 @@
    </h1>
 
 ## What is SOYO?
-SOYO is a Next.js website designed to display video files stored on a local drive (default: F:/). The website is accessible throughout the local network, providing a convenient way to browse and view videos without needing a central server.<br/>Wanted to watch animes on phone but low on storage , so proceeded to spend hours in this
+SOYO is a Next.js web application designed to display and stream video files stored on local drives across your local network. It allows you to browse, search, and watch your media collection from any device without requiring a central cloud server.<br/>Wanted to watch animes on phone but low on storage , so proceeded to spend hours in this
 
 ## Technical Details
 ```
@@ -32,20 +30,22 @@ Styling: Tailwind CSS
 ```
 
 ## Features
-- Displays all video files from the specified local drive.
-- Accessible across devices on the same local network.
-- User-friendly interface for easy navigation and viewing.
-- Fetches anime thumbnails from AniList API to display cover images for videos (if available).
-- Fallback to local thumbnails if no external thumbnail is found.
-- Ability to fetch movie/poster images from IMDb using OMDb API for non-anime videos.
+- Displays video files from configured local media directories across all devices on the local network.
+- Automatic zero-configuration Docker volume discovery for mounted media folders.
+- Live online torrent and magnet streaming via WebTorrent with HTTP range-request support.
+- In-app verified torrent search engine with seeds/leeches counts, resolution tags, and 1-click magnet streaming.
+- Local user profiles with custom avatar uploads and per-profile watch progress tracking.
+- Intelligent scene filename parsing for clean movie titles, release year, resolution (1080p, 720p, 4K), and source badges.
+- Curated media rails for Trending, Most Watched, and Recently Added titles with settings toggles.
+- Fetches anime thumbnails from AniList API and movie posters from OMDb API with local thumbnail fallbacks.
+- Hardware-accelerated 3D magnetic parallax UI with customizable theme accents.
 
 ### Screenshots
 
-
-  <img src="https://github.com/user-attachments/assets/8784693b-1431-46cd-8b0e-d98147396aa4" alt="Laptop view" width="400"/>
-  <img src="https://github.com/user-attachments/assets/1d6fa291-4c01-4f1c-969a-7ad48e23afd7" alt="Mobile view" width="400" />
-  <img src="https://github.com/user-attachments/assets/834900fc-00ad-43fb-9892-fa55fc1d6e6e" alt="Mobile view" width="400" />
-  <img src="https://github.com/user-attachments/assets/2c9a0ad8-aa4e-4063-a0a8-7f14f5a3d727" alt="Laptop view" width="400"/>
+  <img src="https://github.com/user-attachments/assets/38f9e8ab-84d0-47f4-8c3c-407554401e9b" alt="Laptop view" width="400"/>
+  <img src="https://github.com/user-attachments/assets/5aed4b6a-0706-4e84-bdcd-b0851717af74" alt="Mobile view" width="400" />
+  <img src="https://github.com/user-attachments/assets/fe1bfb52-26b4-44f9-bd9a-51248a82df33" alt="Mobile view" width="400" />
+  <img src="https://github.com/user-attachments/assets/46a754a7-e119-4d4a-b68a-86a7b80c0003" alt="Laptop view" width="400"/>
 
   
 
@@ -88,17 +88,17 @@ docker build -t soyo:v1.0 . # build with specific tag
 Run Docker Container
   ```bash
 # Basic run 
-docker run -d -p <port>:8311 --volume=F:/:/Movies --volume=G:/:/Anime --name soyo fal3n4ngel/soyo:latest
+docker run -d -p 3000:3000 --volume=F:/:/Movies --volume=G:/:/Anime --name soyo fal3n4ngel/soyo:latest
 
 # Run with auto-restart policy
-docker run -d --restart=unless-stopped -p <port>:8311 --volume=F:\:/Movies --volume=G:\:/Anime --name soyo fal3n4ngel/soyo:latest
+docker run -d --restart=unless-stopped -p 3000:3000 --volume=F:\:/Movies --volume=G:\:/Anime --name soyo fal3n4ngel/soyo:latest
 
   ```
 ### Access the Website: 
 
   Open your browser and navigate to 
   ```bash
-  http://{ip}:<port> 
+  http://{ip}:3000
   ```
 
 
@@ -107,22 +107,14 @@ docker run -d --restart=unless-stopped -p <port>:8311 --volume=F:\:/Movies --vol
 ### Clone the Repository:
 ```bash
 
-git clone https://github.com/fal3n-4ngel/soyo.git
-cd soyo
+git clone https://github.com/fal3n-4ngel/SOYO.git
+cd SOYO
 ```
 ### Install Dependencies:
 ```bash
 
 npm install
 
-```
-### Create or edit config.json
-```json
-{
-  "movieDir": "F:/",
-  "thumbnailCache": false,
-  "lastAccessedMovie": null
-}
 ```
 
 ### Run the Development Server:
@@ -143,7 +135,7 @@ Open your browser and navigate to
 http://{ip}:3000   # if Development Server
 ``` 
 ```bash 
-http://{ip}:8311   # if Production Server
+http://{ip}:3000   # if Production Server
 ```
  to view the website.
 
@@ -183,4 +175,4 @@ http://{ip}:8311   # if Production Server
 This project is open-source and available under the MIT License.
 
 
-Interested in improving Soyo? I welcome contributions! Feel free to open issues, submit pull requests, or share your ideas on GitHub. Together, we can make this project even better. 🌟
+Interested in improving Soyo? I welcome contributions! Feel free to open issues, submit pull requests, or share your ideas on GitHub. Together, we can make this project even better.

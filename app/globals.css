@@ -1,112 +1,360 @@
-@import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400..700&family=Doto:wght@100..900&family=Playwrite+GB+S:ital,wght@0,100..400;1,100..400&family=Quicksand:wght@300..700&display=swap');
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+/* ------------------------------------------------------------------ *
+ * Design tokens
+ *
+ * Every surface, border and text colour goes through a variable so the
+ * dark theme is a single block of overrides instead of a `dark:` prefix
+ * on every element.
+ * ------------------------------------------------------------------ */
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Warm off-white rather than neutral grey — matches a paper/cream backdrop
+     instead of a cold "app" grey. */
+  --bg: #f7f6f1;
+  --bg-elevated: #ffffff;
+  --bg-sunken: #efeee7;
+  --bg-inset: #f1f0e9;
+
+  --fg: #111110;
+  --fg-muted: #6b6a63;
+  --fg-subtle: #9c9b93;
+
+  --border: #e3e1d7;
+  --border-strong: #d1cfc2;
+
+  --grid-line: rgba(0, 0, 0, 0.05);
+  --shadow-color: rgba(0, 0, 0, 0.08);
+
+  /* Chartreuse accent — pairs with dark text, not white. */
+  --accent: #d7f24c;
+  --accent-fg: #14150f;
+  --accent-soft: rgba(215, 242, 76, 0.22);
+
+  --danger: #dc2626;
+  --success: #16a34a;
+
+  --radius: 16px;
+  --nav-height: 60px;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-.quicksand {
-  font-family: "Quicksand", sans-serif;
-  font-optical-sizing: auto;
-  font-weight: 700;
-  font-style: normal;
-}
-.playwrite {
-  font-family: "Playwrite GB S", cursive;
-  font-optical-sizing: auto;
-  font-weight:100;
-  font-style: normal;
-}
-.dancing-script {
-  font-family: "Doto", sans-serif;
-  font-optical-sizing: auto;
-  font-weight: 700;
-  font-style: normal;
+[data-theme="dark"] {
+  --bg: #0b0b0a;
+  --bg-elevated: #171714;
+  --bg-sunken: #101010;
+  --bg-inset: #1d1d19;
+
+  --fg: #f7f6f1;
+  --fg-muted: #a7a69d;
+  --fg-subtle: #737268;
+
+  --border: #2b2b26;
+  --border-strong: #403f38;
+
+  --grid-line: rgba(255, 255, 255, 0.04);
+  --shadow-color: rgba(0, 0, 0, 0.5);
+
+  /* Same lime — it reads as a brand colour, not a light-mode-only choice. */
+  --accent-fg: #14150f;
 }
 
+@theme inline {
+  --color-bg: var(--bg);
+  --color-elevated: var(--bg-elevated);
+  --color-sunken: var(--bg-sunken);
+  --color-inset: var(--bg-inset);
+
+  --color-fg: var(--fg);
+  --color-muted: var(--fg-muted);
+  --color-subtle: var(--fg-subtle);
+
+  --color-line: var(--border);
+  --color-line-strong: var(--border-strong);
+
+  --color-accent: var(--accent);
+  --color-accent-fg: var(--accent-fg);
+  --color-accent-soft: var(--accent-soft);
+
+  --color-danger: var(--danger);
+  --color-success: var(--success);
+
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jbmono), ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-brand: var(--font-outfit), var(--font-inter), sans-serif;
+}
+
+/* ------------------------------------------------------------------ *
+ * Base
+ * ------------------------------------------------------------------ */
+
+html {
+  color-scheme: light;
+  scrollbar-gutter: stable;
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+}
 
 body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
+::selection {
+  background: var(--fg);
+  color: var(--bg);
 }
 
-/* Option 1: Dark Theme Scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-.custome-scrollbar::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-  background: #2f2f2f;
-}
-
-::-webkit-scrollbar-track {
-  background: #141414;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #2f2f2f;
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
   border-radius: 4px;
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: #3f3f3f;
+/* ------------------------------------------------------------------ *
+ * Utilities
+ * ------------------------------------------------------------------ */
+
+@layer utilities {
+  .bg-grid {
+    background-size: 56px 56px;
+    background-image:
+      linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
+    background-position: center top;
+  }
+
+  /* Fades the grid out down the page so content never fights the lines. */
+  .bg-grid-fade {
+    mask-image: linear-gradient(to bottom, black 0%, black 30%, transparent 85%);
+    -webkit-mask-image: linear-gradient(to bottom, black 0%, black 30%, transparent 85%);
+  }
+
+  .surface {
+    background-color: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .scrollbar-none {
+    scrollbar-width: none;
+  }
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+
+  .tap-highlight-none {
+    -webkit-tap-highlight-color: transparent;
+  }
 }
 
-/* Option 2: Theme-Aware Scrollbar */
-@layer base {
-  :root {
-    --scrollbar-track: #f1f1f1;
-    --scrollbar-thumb: #c1c1c1;
-    --scrollbar-hover: #a8a8a8;
+/* ------------------------------------------------------------------ *
+ * Components
+ * ------------------------------------------------------------------ */
+
+@layer components {
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 10px;
+    font-family: var(--font-jbmono), ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 0.75rem 1.25rem;
+    transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease,
+      opacity 0.15s ease;
+    cursor: pointer;
+    white-space: nowrap;
   }
 
-  [data-theme='dark'] {
-    --scrollbar-track: #141414;
-    --scrollbar-thumb: #2f2f2f;
-    --scrollbar-hover: #3f3f3f;
+  .btn-primary {
+    background-color: var(--fg);
+    color: var(--bg);
+  }
+  .btn-primary:hover:not(:disabled) {
+    opacity: 0.85;
   }
 
-  /* Firefox */
-  * {
-    scrollbar-width: thin;
-    scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+  .btn-accent {
+    background-color: var(--accent);
+    color: var(--accent-fg);
+  }
+  .btn-accent:hover:not(:disabled) {
+    filter: brightness(1.1);
   }
 
-  /* Chrome, Edge, Safari */
-  *::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+  .btn-ghost {
+    background-color: transparent;
+    color: var(--fg-muted);
+    border: 1px solid var(--border);
+  }
+  .btn-ghost:hover:not(:disabled) {
+    color: var(--fg);
+    border-color: var(--border-strong);
+    background-color: var(--bg-inset);
   }
 
-  *::-webkit-scrollbar-track {
-    background: var(--scrollbar-track);
+  .btn-danger {
+    background-color: transparent;
+    color: var(--danger);
+    border: 1px solid color-mix(in srgb, var(--danger) 35%, transparent);
+  }
+  .btn-danger:hover:not(:disabled) {
+    background-color: color-mix(in srgb, var(--danger) 10%, transparent);
   }
 
-  *::-webkit-scrollbar-thumb {
-    background: var(--scrollbar-thumb);
-    border-radius: 4px;
+  .btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
   }
 
-  *::-webkit-scrollbar-thumb:hover {
-    background: var(--scrollbar-hover);
+  .field {
+    width: 100%;
+    background-color: var(--bg-inset);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+    color: var(--fg);
+    transition: border-color 0.15s ease, background-color 0.15s ease;
+  }
+  .field:focus {
+    outline: none;
+    border-color: var(--accent);
+    background-color: var(--bg-elevated);
+  }
+  .field::placeholder {
+    color: var(--fg-subtle);
+  }
+
+  .label {
+    display: block;
+    font-family: var(--font-jbmono), ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--fg-muted);
+    margin-bottom: 0.5rem;
+  }
+
+  .eyebrow {
+    font-family: var(--font-jbmono), ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.625rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--fg-subtle);
+  }
+
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background-color: var(--bg-elevated);
+    padding: 0.375rem 0.75rem;
+    font-family: var(--font-jbmono), ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    white-space: nowrap;
+  }
+  .chip:hover {
+    color: var(--fg);
+    border-color: var(--border-strong);
+  }
+  .chip[data-active="true"] {
+    background-color: var(--fg);
+    border-color: var(--fg);
+    color: var(--bg);
+  }
+}
+
+/* ------------------------------------------------------------------ *
+ * Scrollbar
+ * ------------------------------------------------------------------ */
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 999px;
+  border: 3px solid var(--bg);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--fg-subtle);
+}
+
+/* ------------------------------------------------------------------ *
+ * Motion
+ * ------------------------------------------------------------------ */
+
+@keyframes soyo-shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* Idle drift for the hero collage — small enough to read as "alive", not distracting. */
+@keyframes soyo-drift {
+  0%,
+  100% {
+    margin-top: 0px;
+  }
+  50% {
+    margin-top: -9px;
+  }
+}
+
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background-color: var(--bg-inset);
+}
+.skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background-image: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--fg) 6%, transparent),
+    transparent
+  );
+  animation: soyo-shimmer 1.6s infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }
