@@ -41,11 +41,10 @@ Styling: Tailwind CSS
 
 ### Screenshots
 
-
-  <img src="https://github.com/user-attachments/assets/8784693b-1431-46cd-8b0e-d98147396aa4" alt="Laptop view" width="400"/>
-  <img src="https://github.com/user-attachments/assets/1d6fa291-4c01-4f1c-969a-7ad48e23afd7" alt="Mobile view" width="400" />
-  <img src="https://github.com/user-attachments/assets/834900fc-00ad-43fb-9892-fa55fc1d6e6e" alt="Mobile view" width="400" />
-  <img src="https://github.com/user-attachments/assets/2c9a0ad8-aa4e-4063-a0a8-7f14f5a3d727" alt="Laptop view" width="400"/>
+  <img src="https://github.com/user-attachments/assets/38f9e8ab-84d0-47f4-8c3c-407554401e9b" alt="Laptop view" width="400"/>
+  <img src="https://github.com/user-attachments/assets/5aed4b6a-0706-4e84-bdcd-b0851717af74" alt="Mobile view" width="400" />
+  <img src="https://github.com/user-attachments/assets/fe1bfb52-26b4-44f9-bd9a-51248a82df33" alt="Mobile view" width="400" />
+  <img src="https://github.com/user-attachments/assets/46a754a7-e119-4d4a-b68a-86a7b80c0003" alt="Laptop view" width="400"/>
 
   
 
