@@ -5,6 +5,7 @@ import { useCallback, useEffect, useRef } from "react";
 import { Bookmark, Lock, Play } from "lucide-react";
 import DynamicThumbnail from "./DynamicThumbnail";
 import { formatBytes, formatDuration, prettyTitle, type Movie } from "@/app/lib/types";
+import { parseMediaInfo } from "@/app/lib/mediaParser";
 
 interface MovieCardProps {
   movie: Movie;
@@ -109,20 +110,44 @@ export default function MovieCard({
         </div>
 
         <div className="p-3">
-          <h4 className="line-clamp-2 text-[13px] font-semibold leading-snug text-fg">
-            {prettyTitle(movie.name)}
-          </h4>
-          <div className="mt-1.5 flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-subtle">
-            <span>{movie.format.replace(".", "")}</span>
-            <span aria-hidden>·</span>
-            <span>{formatBytes(movie.size)}</span>
-            {movie.duration > 0 && (
+          {(() => {
+            const parsed = parseMediaInfo(movie.name);
+            return (
               <>
-                <span aria-hidden>·</span>
-                <span>{formatDuration(movie.duration)}</span>
+                <h4 className="line-clamp-2 text-[13px] font-semibold leading-snug text-fg">
+                  {parsed.cleanTitle}
+                </h4>
+
+                <div className="mt-2 flex flex-wrap items-center gap-1.5 text-[9px] font-bold uppercase tracking-wider text-muted">
+                  {parsed.year && (
+                    <span className="rounded bg-inset px-1.5 py-0.5 border border-line text-fg">
+                      {parsed.year}
+                    </span>
+                  )}
+                  {parsed.resolution && (
+                    <span className="rounded bg-accent/20 px-1.5 py-0.5 text-accent-fg border border-accent/30 font-extrabold">
+                      {parsed.resolution}
+                    </span>
+                  )}
+                  {parsed.source && (
+                    <span className="rounded bg-inset px-1.5 py-0.5 border border-line text-subtle">
+                      {parsed.source}
+                    </span>
+                  )}
+                  <span className="rounded bg-inset px-1.5 py-0.5 border border-line text-subtle">
+                    {movie.format.replace(".", "")}
+                  </span>
+                  <span>{formatBytes(movie.size)}</span>
+                  {movie.duration > 0 && (
+                    <>
+                      <span aria-hidden>·</span>
+                      <span>{formatDuration(movie.duration)}</span>
+                    </>
+                  )}
+                </div>
               </>
-            )}
-          </div>
+            );
+          })()}
         </div>
       </Link>
 

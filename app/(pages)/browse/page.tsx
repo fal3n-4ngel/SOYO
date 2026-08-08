@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import Nav from "@/app/components/Nav";
 import MovieCard from "@/app/components/MovieCard";
+import MediaRail from "@/app/components/MediaRail";
 import PinModal from "@/app/components/PinModal";
 import DynamicThumbnail from "@/app/components/DynamicThumbnail";
 import {
@@ -26,6 +27,7 @@ import {
   type Movie,
   type MoviesResponse,
 } from "@/app/lib/types";
+import { parseMediaInfo } from "@/app/lib/mediaParser";
 
 type SortKey = "name" | "added" | "size" | "recent";
 
@@ -49,6 +51,7 @@ function BrowseContent() {
   const [sort, setSort] = useState<SortKey>((searchParams.get("sort") as SortKey) || "name");
   const [folder, setFolder] = useState(searchParams.get("folder") ?? "");
   const [format, setFormat] = useState(searchParams.get("format") ?? "");
+  const [quality, setQuality] = useState("");
   const [favoritesOnly, setFavoritesOnly] = useState(searchParams.get("favorites") === "1");
   const [view, setView] = useState<"grid" | "list">("grid");
 
@@ -86,12 +89,21 @@ function BrowseContent() {
     const needle = query.trim().toLowerCase();
     if (needle) {
       result = result.filter(
-        (m) =>
-          m.name.toLowerCase().includes(needle) || m.folder.toLowerCase().includes(needle)
+        (m) => {
+          const parsed = parseMediaInfo(m.name);
+          return (
+            m.name.toLowerCase().includes(needle) ||
+            parsed.cleanTitle.toLowerCase().includes(needle) ||
+            m.folder.toLowerCase().includes(needle)
+          );
+        }
       );
     }
     if (folder) result = result.filter((m) => m.folder === folder);
     if (format) result = result.filter((m) => m.format === format);
+    if (quality) {
+      result = result.filter((m) => parseMediaInfo(m.name).resolution === quality);
+    }
     if (favoritesOnly) result = result.filter((m) => m.favorite);
 
     switch (sort) {
@@ -105,11 +117,15 @@ function BrowseContent() {
         result.sort((a, b) => (b.watchedAt ?? 0) - (a.watchedAt ?? 0));
         break;
       default:
-        result.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
+        result.sort((a, b) =>
+          parseMediaInfo(a.name).cleanTitle.localeCompare(parseMediaInfo(b.name).cleanTitle, undefined, {
+            numeric: true,
+          })
+        );
     }
 
     return result;
-  }, [data, query, folder, format, favoritesOnly, sort]);
+  }, [data, query, folder, format, quality, favoritesOnly, sort]);
 
   const toggleFavorite = useCallback(async (name: string) => {
     setData((current) =>
@@ -143,11 +159,12 @@ function BrowseContent() {
     setQuery("");
     setFolder("");
     setFormat("");
+    setQuality("");
     setFavoritesOnly(false);
     router.replace("/browse");
   };
 
-  const activeFilters = [folder, format, favoritesOnly ? "fav" : ""].filter(Boolean).length;
+  const activeFilters = [folder, format, quality, favoritesOnly ? "fav" : ""].filter(Boolean).length;
 
   return (
     <div className="min-h-screen bg-bg">
@@ -237,6 +254,20 @@ function BrowseContent() {
                 ))}
               </div>
 
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="eyebrow mr-1">Quality</span>
+                {["1080P", "720P", "480P", "4K"].map((val) => (
+                  <button
+                    key={val}
+                    onClick={() => setQuality(quality === val ? "" : val)}
+                    data-active={quality === val}
+                    className="chip"
+                  >
+                    {val}
+                  </button>
+                ))}
+              </div>
+
               {data && data.formats.length > 1 && (
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="eyebrow mr-1">Format</span>
@@ -315,6 +346,20 @@ function BrowseContent() {
           </div>
         )}
 
+        {/* Featured Rails (rendered when no active search/filters) */}
+        {data && !query && !folder && !format && !quality && !favoritesOnly && (
+          <div className="mb-6 space-y-2">
+            {data.trending && data.trending.length > 0 && (
+              <MediaRail title="Trending Now" icon="🔥" movies={data.trending} onToggleFavorite={toggleFavorite} />
+            )}
+            {data.mostWatched && data.mostWatched.length > 0 && (
+              <MediaRail title="Most Watched" icon="👁️" movies={data.mostWatched} onToggleFavorite={toggleFavorite} />
+            )}
+            {data.recentlyAdded && data.recentlyAdded.length > 0 && (
+              <MediaRail title="Recently Added" icon="🆕" movies={data.recentlyAdded} onToggleFavorite={toggleFavorite} />
+            )}
+          </div>
+        )}
         {!data && !error && (
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
             {Array.from({ length: 15 }).map((_, index) => (

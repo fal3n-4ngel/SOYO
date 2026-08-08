@@ -2,8 +2,8 @@
 
 import { use, useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { ArrowLeft, Folder, Heart, Info, Play, RotateCcw } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { ArrowLeft, Folder, Heart, Info, Magnet, Play, RotateCcw } from "lucide-react";
 import Nav from "@/app/components/Nav";
 import VideoPlayer, { type MediaInfo } from "@/app/components/VideoPlayer";
 import DynamicThumbnail from "@/app/components/DynamicThumbnail";
@@ -19,6 +19,8 @@ export default function StreamPage({ params }: { params: Promise<{ movie: string
   const { movie } = use(params);
   const name = decodeURIComponent(movie);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const torrentUrl = searchParams.get("torrentUrl");
 
   const [info, setInfo] = useState<MediaInfo | null>(null);
   const [library, setLibrary] = useState<MoviesResponse | null>(null);
@@ -27,6 +29,29 @@ export default function StreamPage({ params }: { params: Promise<{ movie: string
 
   useEffect(() => {
     let cancelled = false;
+
+    if (torrentUrl) {
+      setInfo({
+        name,
+        folder: "Torrent",
+        format: ".mp4",
+        size: 0,
+        delivery: "direct",
+        seekable: true,
+        subtitles: [],
+        progress: { time: 0, duration: 0, completed: false },
+        next: null,
+        settings: {
+          autoplay: true,
+          autoplayNext: false,
+          defaultVolume: 0.8,
+          seekStep: 10,
+          rememberPosition: false,
+        },
+        probe: null,
+      });
+      return;
+    }
 
     fetch(`/api/media/${encodeURIComponent(name)}`)
       .then(async (response) => {
@@ -49,7 +74,7 @@ export default function StreamPage({ params }: { params: Promise<{ movie: string
     return () => {
       cancelled = true;
     };
-  }, [name]);
+  }, [name, torrentUrl]);
 
   const toggleFavorite = useCallback(async () => {
     setFavorite((value) => !value);

@@ -16,7 +16,19 @@ export interface ProgressEntry {
   duration: number;
   updatedAt: number;
   completed: boolean;
+  playCount?: number;
 }
+
+export interface UserProfile {
+  id: string;
+  name: string;
+  avatar: string;
+  createdAt: number;
+}
+
+export const DEFAULT_AVATARS = [
+  "🍿", "🎬", "📽️", "🍿", "📺", "⭐", "🚀", "🎭"
+];
 
 export interface Settings {
   /** Root folders scanned for media. The first is the default write target. */
@@ -49,6 +61,10 @@ export interface Settings {
 
   extensions: string[];
   scanOnStart: boolean;
+
+  showTrending: boolean;
+  showMostWatched: boolean;
+  showRecentlyAdded: boolean;
 }
 
 export interface MovieMeta {
@@ -68,6 +84,7 @@ export interface MovieMeta {
 export interface SoyoDB {
   version: number;
   settings: Settings;
+  users: UserProfile[];
   progress: Record<string, ProgressEntry>;
   favorites: string[];
   library: {
@@ -107,12 +124,24 @@ export const DEFAULT_SETTINGS: Settings = {
 
   extensions: [".mp4", ".mkv", ".webm", ".avi", ".mov", ".m4v", ".ogg", ".wmv", ".flv"],
   scanOnStart: false,
+
+  showTrending: true,
+  showMostWatched: true,
+  showRecentlyAdded: true,
 };
 
 function emptyDB(): SoyoDB {
   return {
     version: DB_VERSION,
     settings: { ...DEFAULT_SETTINGS },
+    users: [
+      {
+        id: "default-user",
+        name: "Main Profile",
+        avatar: "🍿",
+        createdAt: Date.now(),
+      },
+    ],
     progress: {},
     favorites: [],
     library: { movies: [], scannedAt: null, durationMs: 0 },
@@ -133,9 +162,14 @@ function migrate(raw: Record<string, unknown>): SoyoDB {
 
   if (typeof raw.version === "number" && raw.version >= DB_VERSION) {
     // Already current — merge so new setting keys pick up their defaults.
+    const users = Array.isArray(raw.users) && raw.users.length > 0
+      ? (raw.users as UserProfile[])
+      : db.users;
+
     return {
       ...db,
       ...(raw as unknown as SoyoDB),
+      users,
       settings: { ...DEFAULT_SETTINGS, ...((raw.settings as Partial<Settings>) ?? {}) },
       library: { ...db.library, ...((raw.library as SoyoDB["library"]) ?? {}) },
     };
@@ -258,31 +292,117 @@ export function verifyPin(pin: string): boolean {
 }
 
 /* ------------------------------------------------------------------ *
+ * Users / Profiles
+ * ------------------------------------------------------------------ */
+
+export function getUsers(): UserProfile[] {
+  const db = readDB();
+  if (!db.users || db.users.length === 0) {
+    return updateDB((d) => {
+      d.users = [
+        {
+          id: "default-user",
+          name: "Main Profile",
+          avatar: "🍿",
+          createdAt: Date.now(),
+        },
+      ];
+    }).users;
+  }
+  return db.users;
+}
+
+export function getUser(id: string): UserProfile | null {
+  return getUsers().find((u) => u.id === id) ?? null;
+}
+
+export function createUser(name: string, avatar?: string): UserProfile {
+  const newUser: UserProfile = {
+    id: `user_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+    name: name.trim() || "Watcher",
+    avatar: avatar || "🍿",
+    createdAt: Date.now(),
+  };
+
+  updateDB((db) => {
+    if (!db.users) db.users = [];
+    db.users.push(newUser);
+  });
+
+  return newUser;
+}
+
+export function updateUser(id: string, patch: Partial<Omit<UserProfile, "id" | "createdAt">>): UserProfile | null {
+  let updated: UserProfile | null = null;
+  updateDB((db) => {
+    const user = db.users?.find((u) => u.id === id);
+    if (user) {
+      if (patch.name) user.name = patch.name.trim();
+      if (patch.avatar) user.avatar = patch.avatar;
+      updated = { ...user };
+    }
+  });
+  return updated;
+}
+
+export function deleteUser(id: string): boolean {
+  let deleted = false;
+  updateDB((db) => {
+    if (db.users && db.users.length > 1) {
+      const idx = db.users.findIndex((u) => u.id === id);
+      if (idx !== -1) {
+        db.users.splice(idx, 1);
+        deleted = true;
+      }
+    }
+  });
+  return deleted;
+}
+
+/* ------------------------------------------------------------------ *
  * Progress
  * ------------------------------------------------------------------ */
 
-export function getProgress(movieName: string): ProgressEntry | null {
-  return readDB().progress[movieName] ?? null;
+function getProgressKey(movieName: string, userId?: string): string {
+  return userId ? `${userId}:${movieName}` : movieName;
+}
+
+export function getProgress(movieName: string, userId?: string): ProgressEntry | null {
+  const db = readDB();
+  if (userId) {
+    const userKey = getProgressKey(movieName, userId);
+    if (db.progress[userKey]) return db.progress[userKey];
+  }
+  return db.progress[movieName] ?? null;
 }
 
 export function updateProgress(
   movieName: string,
   time: number,
-  duration = 0
+  duration = 0,
+  userId?: string
 ): ProgressEntry {
   const { completedThreshold } = getSettings();
+  const key = getProgressKey(movieName, userId);
+
+  const previous = readDB().progress[key] ?? readDB().progress[movieName];
+  const previousPlayCount = previous?.playCount ?? 0;
+  // Increment play count if this is the start of a watch session or brand new
+  const isNewSession = !previous || (Date.now() - previous.updatedAt > 1000 * 60 * 30);
+  const playCount = isNewSession ? previousPlayCount + 1 : Math.max(1, previousPlayCount);
+
   const entry: ProgressEntry = {
     time,
     duration,
     updatedAt: Date.now(),
     completed: duration > 0 && time / duration >= completedThreshold,
+    playCount,
   };
 
   updateDB((db) => {
-    const previous = db.progress[movieName];
     // Never lose a known duration because one ping arrived before metadata.
     if (previous && !duration) entry.duration = previous.duration;
-    db.progress[movieName] = entry;
+    db.progress[key] = entry;
   });
 
   return entry;

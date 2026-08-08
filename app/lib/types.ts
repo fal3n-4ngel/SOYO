@@ -1,3 +1,7 @@
+import { parseMediaInfo, ParsedMedia } from "./mediaParser";
+
+export type { ParsedMedia };
+
 export interface Movie {
   name: string;
   relPath: string;
@@ -12,6 +16,8 @@ export interface Movie {
   duration: number;
   watchedAt: number | null;
   completed: boolean;
+  playCount?: number;
+  parsed?: ParsedMedia;
 }
 
 export interface LibraryStats {
@@ -29,6 +35,9 @@ export interface MoviesResponse {
   movies: Movie[];
   total: number;
   continueWatching: Movie[];
+  trending?: Movie[];
+  mostWatched?: Movie[];
+  recentlyAdded?: Movie[];
   folders: string[];
   formats: string[];
   isUnlocked: boolean;
@@ -53,13 +62,9 @@ export interface NetworkInfo {
   };
 }
 
-/** Strips the extension and separator noise from a filename for display. */
+/** Strips release tags, symbols, and codecs for a clean display title. */
 export function prettyTitle(name: string): string {
-  return name
-    .replace(/\.[^/.]+$/, "")
-    .replace(/[._]+/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
+  return parseMediaInfo(name).cleanTitle;
 }
 
 export function formatBytes(bytes: number): string {

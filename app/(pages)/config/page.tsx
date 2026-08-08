@@ -55,6 +55,9 @@ interface Settings {
   externalArtwork: boolean;
   extensions: string[];
   scanOnStart: boolean;
+  showTrending: boolean;
+  showMostWatched: boolean;
+  showRecentlyAdded: boolean;
 }
 
 const TABS = [
@@ -581,6 +584,32 @@ function LibraryTab({
             hint="Falls back to OMDb and AniList when a frame can't be extracted."
             checked={settings.externalArtwork}
             onChange={(value) => save({ externalArtwork: value })}
+          />
+        </div>
+      </Section>
+
+      <Section
+        title="Featured Rails"
+        description="Choose which curated media carousels appear on your home and library screens."
+      >
+        <div className="divide-y divide-line">
+          <Toggle
+            label="Trending rail"
+            hint="Displays popular or recently active titles."
+            checked={settings.showTrending}
+            onChange={(value) => save({ showTrending: value })}
+          />
+          <Toggle
+            label="Most Watched rail"
+            hint="Displays titles with the highest play counts."
+            checked={settings.showMostWatched}
+            onChange={(value) => save({ showMostWatched: value })}
+          />
+          <Toggle
+            label="Recently Added rail"
+            hint="Displays newly added media files sorted by date."
+            checked={settings.showRecentlyAdded}
+            onChange={(value) => save({ showRecentlyAdded: value })}
           />
           <Slider
             label="Frame position"

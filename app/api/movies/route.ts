@@ -11,6 +11,7 @@ interface MovieDTO extends MovieMeta {
   duration: number;
   watchedAt: number | null;
   completed: boolean;
+  playCount: number;
 }
 
 function sortMovies(movies: MovieDTO[], key: SortKey): MovieDTO[] {
@@ -48,6 +49,7 @@ export async function GET(request: NextRequest) {
         duration: entry?.duration ?? 0,
         watchedAt: entry?.updatedAt ?? null,
         completed: entry?.completed ?? false,
+        playCount: entry?.playCount ?? 0,
       };
     });
 
@@ -77,10 +79,30 @@ export async function GET(request: NextRequest) {
     if (Number.isFinite(limit) && limit > 0) movies = movies.slice(0, limit);
 
     // --- derived rails -----------------------------------------------------
+    const allMovies = [...movies];
+
     const continueWatching = sortMovies(
-      movies.filter((m) => m.progress > 30 && !m.completed),
+      allMovies.filter((m) => m.progress > 30 && !m.completed),
       "recent"
     ).slice(0, 12);
+
+    const trending = settings.showTrending
+      ? [...allMovies]
+          .filter((m) => m.playCount > 0 || m.watchedAt)
+          .sort((a, b) => (b.watchedAt ?? 0) * (b.playCount || 1) - (a.watchedAt ?? 0) * (a.playCount || 1))
+          .slice(0, 10)
+      : undefined;
+
+    const mostWatched = settings.showMostWatched
+      ? [...allMovies]
+          .filter((m) => m.playCount > 0)
+          .sort((a, b) => (b.playCount || 0) - (a.playCount || 0))
+          .slice(0, 10)
+      : undefined;
+
+    const recentlyAdded = settings.showRecentlyAdded
+      ? [...allMovies].sort((a, b) => b.mtime - a.mtime).slice(0, 10)
+      : undefined;
 
     const folders = [...new Set(library.map((m) => m.folder).filter(Boolean))].sort();
     const formats = [...new Set(library.map((m) => m.format))].sort();
@@ -89,6 +111,9 @@ export async function GET(request: NextRequest) {
       movies,
       total,
       continueWatching,
+      trending,
+      mostWatched,
+      recentlyAdded,
       folders,
       formats,
       isUnlocked: unlocked,
